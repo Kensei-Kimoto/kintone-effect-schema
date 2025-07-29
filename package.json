@@ -1,0 +1,69 @@
+{
+  "name": "kintone-effect-schema",
+  "version": "0.1.0",
+  "description": "Type-safe kintone field schema definitions with Effect-TS. Normalize empty values, validate writes, and ensure runtime type safety for kintone API responses.",
+  "keywords": [
+    "kintone",
+    "effect",
+    "effect-ts",
+    "schema",
+    "validation",
+    "typescript",
+    "cybozu",
+    "field-validation",
+    "runtime-validation"
+  ],
+  "author": "Kensei-Kimoto",
+  "license": "MIT",
+  "homepage": "https://github.com/Kensei-Kimoto/kintone-effect-schema#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kensei-Kimoto/kintone-effect-schema.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Kensei-Kimoto/kintone-effect-schema/issues"
+  },
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "prepublishOnly": "npm run typecheck && npm run lint && npm run test && npm run build"
+  },
+  "peerDependencies": {
+    "effect": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/ui": "^3.2.4",
+    "effect": "^3.17.3",
+    "eslint": "^9.32.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
