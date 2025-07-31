@@ -28,6 +28,8 @@ export type KintoneFieldType =
   | 'RECORD_ID'
   | 'REVISION'
   | 'SUBTABLE'
+  | 'SPACER'
+  | 'LABEL'
 
 export interface KintoneUser {
   code: string

@@ -442,6 +442,23 @@ export const RevisionFieldPropertiesSchema = Schema.Struct({
   label: Schema.String,
 });
 
+export const SpacerFieldPropertiesSchema = Schema.Struct({
+  type: Schema.Literal('SPACER'),
+  elementId: Schema.String,
+  size: Schema.Struct({
+    width: Schema.Union(Schema.Number, Schema.String),
+    height: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+  }),
+});
+
+export const LabelFieldPropertiesSchema = Schema.Struct({
+  type: Schema.Literal('LABEL'),
+  label: Schema.String,
+  size: Schema.Struct({
+    width: Schema.Union(Schema.Number, Schema.String),
+  }),
+});
+
 // 全フィールドタイプのUnion
 export const KintoneFieldPropertiesSchema = Schema.Union(
   SingleLineTextFieldPropertiesSchema,
@@ -473,7 +490,9 @@ export const KintoneFieldPropertiesSchema = Schema.Union(
   CategoryFieldPropertiesSchema,
   GroupFieldPropertiesSchema,
   RecordIdFieldPropertiesSchema,
-  RevisionFieldPropertiesSchema
+  RevisionFieldPropertiesSchema,
+  SpacerFieldPropertiesSchema,
+  LabelFieldPropertiesSchema
 );
 
 // フォームフィールド取得APIのレスポンススキーマ
@@ -517,5 +536,7 @@ export type SubtableFieldProperties = Schema.Schema.Type<typeof SubtableFieldPro
 export type GroupFieldProperties = Schema.Schema.Type<typeof GroupFieldPropertiesSchema>;
 export type RecordIdFieldProperties = Schema.Schema.Type<typeof RecordIdFieldPropertiesSchema>;
 export type RevisionFieldProperties = Schema.Schema.Type<typeof RevisionFieldPropertiesSchema>;
+export type SpacerFieldProperties = Schema.Schema.Type<typeof SpacerFieldPropertiesSchema>;
+export type LabelFieldProperties = Schema.Schema.Type<typeof LabelFieldPropertiesSchema>;
 export type KintoneFieldProperties = Schema.Schema.Type<typeof KintoneFieldPropertiesSchema>;
 export type GetFormFieldsResponse = Schema.Schema.Type<typeof GetFormFieldsResponseSchema>;
