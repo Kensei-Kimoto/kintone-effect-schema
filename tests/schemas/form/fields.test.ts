@@ -10,6 +10,8 @@ import {
   SubtableFieldPropertiesSchema,
   GetFormFieldsResponseSchema,
   KintoneFieldPropertiesSchema,
+  SpacerFieldPropertiesSchema,
+  LabelFieldPropertiesSchema,
 } from '../../../src/schemas/form/fields.js'
 
 describe('Kintone Form Field Properties Schemas', () => {
@@ -350,6 +352,103 @@ describe('Kintone Form Field Properties Schemas', () => {
         }
         expect(() => Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)).toThrow()
       })
+    })
+  })
+
+  describe('SpacerFieldPropertiesSchema', () => {
+    it('should parse valid spacer field properties', () => {
+      const input = {
+        type: 'SPACER',
+        elementId: 'spacer_1',
+        size: {
+          width: 200,
+          height: 50,
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SpacerFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse with string size values', () => {
+      const input = {
+        type: 'SPACER',
+        elementId: 'spacer_2',
+        size: {
+          width: '100%',
+          height: '2em',
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SpacerFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse without height', () => {
+      const input = {
+        type: 'SPACER',
+        elementId: 'spacer_3',
+        size: {
+          width: 300,
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SpacerFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should be included in KintoneFieldPropertiesSchema union', () => {
+      const input = {
+        type: 'SPACER',
+        elementId: 'spacer_test',
+        size: {
+          width: 100,
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(KintoneFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+  })
+
+  describe('LabelFieldPropertiesSchema', () => {
+    it('should parse valid label field properties', () => {
+      const input = {
+        type: 'LABEL',
+        label: 'セクションタイトル',
+        size: {
+          width: 500,
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(LabelFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse with string width value', () => {
+      const input = {
+        type: 'LABEL',
+        label: '説明文',
+        size: {
+          width: '80%',
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(LabelFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should be included in KintoneFieldPropertiesSchema union', () => {
+      const input = {
+        type: 'LABEL',
+        label: 'ラベルテスト',
+        size: {
+          width: 200,
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(KintoneFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
     })
   })
 })
