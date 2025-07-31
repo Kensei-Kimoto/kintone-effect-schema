@@ -26,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           rm -rf node_modules package-lock.json
-          npm ci
+          npm install
 
       - name: Type check
         run: npm run typecheck
