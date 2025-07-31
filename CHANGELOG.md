@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0](https://github.com/Kensei-Kimoto/kintone-effect-schema/compare/v0.2.0...v0.3.0) (2025-07-31)
+
+
+### Features
+
+* add SPACER and LABEL field types to form schemas ([87533be](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/87533bec69cde6f9f11b4f83a7d14b2c6e1b76b0))
+
+
+### Bug Fixes
+
+* remove package-lock.json before install to resolve rollup platform dependency ([ff2e17a](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/ff2e17aba6fc0a9e36c205d04321a51c59c7540e))
+* resolve rollup dependency issue in CI environment ([2f9a05b](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/2f9a05b92c345ad3992c83e4210afe8d3918a3d0))
+
 ## [0.2.0] - 2025-01-31
 
 ### Added
