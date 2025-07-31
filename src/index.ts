@@ -159,3 +159,6 @@ export type KintoneRecordForWrite = Schema.Schema.Type<typeof KintoneRecordForWr
 // 便利な型エイリアス
 export type KintoneRecordData = Record<string, KintoneField | SubtableField>
 export type KintoneRecordWriteData = Record<string, { value: unknown }>
+
+// フォームフィールド設定スキーマのエクスポート
+export * from './schemas/form/index.js'

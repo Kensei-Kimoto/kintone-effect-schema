@@ -1,6 +1,6 @@
 # kintone-effect-schema
 
-Type-safe schema definitions for kintone fields using Effect-TS. Normalize empty values, validate writes, and ensure runtime type safety for kintone API responses.
+Type-safe schema definitions for kintone fields using Effect-TS. Normalize empty values, validate writes, and ensure runtime type safety for kintone API responses. Also supports Form Fields API for type-safe app configuration management.
 
 [日本語版 README はこちら](./README.ja.md)
 
@@ -11,6 +11,7 @@ Type-safe schema definitions for kintone fields using Effect-TS. Normalize empty
 - ✅ **Write Validation** - Automatic validation for fields that don't allow empty values
 - 📦 **All Field Types** - Support for all kintone field types
 - 🎯 **Effect-TS** - Powerful schema validation with Effect ecosystem
+- ⚙️ **Form Fields API** - Type-safe field configuration management
 
 ## Why Effect-TS Schema?
 
@@ -309,6 +310,7 @@ const updateData = {
 - `STATUS_ASSIGNEE` - Status assignee
 - `FILE` - Attachment
 - `LOOKUP` - Lookup
+- `REFERENCE_TABLE` - Related records list
 
 ### System Fields
 - `RECORD_NUMBER` - Record number
@@ -319,21 +321,167 @@ const updateData = {
 - `MODIFIER` - Modifier
 - `UPDATED_TIME` - Updated time
 
-### Other
+### Layout Fields
 - `SUBTABLE` - Table
+- `GROUP` - Group
+
+## Form Fields Schema (New Feature!)
+
+Support for kintone Form Fields API to manage field configurations with type safety.
+
+### Getting Field Configurations
+
+```typescript
+import { Schema } from 'effect';
+import { GetFormFieldsResponseSchema, type GetFormFieldsResponse } from 'kintone-effect-schema';
+import { KintoneRestAPIClient } from '@kintone/rest-api-client';
+
+// Parse Form Fields API response
+const client = new KintoneRestAPIClient({
+  baseUrl: 'https://example.cybozu.com',
+  auth: { /* authentication */ }
+});
+
+const apiResponse = await client.app.getFormFields({
+  app: 1,
+});
+const formFields: GetFormFieldsResponse = Schema.decodeUnknownSync(
+  GetFormFieldsResponseSchema
+)(apiResponse);
+
+// Type-safe access to field configurations
+Object.entries(formFields.properties).forEach(([fieldCode, fieldProps]) => {
+  console.log(`Field Code: ${fieldCode}`);
+  console.log(`Field Type: ${fieldProps.type}`);
+  console.log(`Label: ${fieldProps.label}`);
+  
+  // Type-specific processing
+  switch (fieldProps.type) {
+    case 'SINGLE_LINE_TEXT':
+      console.log(`Max Length: ${fieldProps.maxLength}`);
+      console.log(`Required: ${fieldProps.required}`);
+      break;
+    case 'NUMBER':
+      console.log(`Unit: ${fieldProps.unit}`);
+      console.log(`Unit Position: ${fieldProps.unitPosition}`);
+      break;
+    case 'SUBTABLE':
+      // Fields inside subtable
+      Object.entries(fieldProps.fields).forEach(([subCode, subField]) => {
+        console.log(`  Sub-field: ${subCode} - ${subField.type}`);
+      });
+      break;
+  }
+});
+```
+
+### Field Configuration Types
+
+Type definitions for each field configuration:
+
+```typescript
+import type {
+  SingleLineTextFieldProperties,
+  NumberFieldProperties,
+  SubtableFieldProperties,
+  // ... other field types
+} from 'kintone-effect-schema';
+
+// Type-safe field configuration creation
+const textFieldProps: SingleLineTextFieldProperties = {
+  type: 'SINGLE_LINE_TEXT',
+  code: 'company_name',
+  label: 'Company Name',
+  required: true,
+  unique: true,
+  minLength: '1',
+  maxLength: '100',
+  defaultValue: '',
+};
+```
+
+### Field Code Validation
+
+kintone field codes have specific constraints that are automatically validated:
+
+- Allowed characters: Hiragana, Katakana, Kanji, alphanumeric, underscore, middle dot, currency symbols
+- Reserved words (`ステータス`, `作業者`, `カテゴリー`, `__ROOT__`, `not`) are not allowed
+- Cannot start with a number
+
+### Subtable Constraints
+
+Only the following field types can be used inside subtables:
+
+- Single-line text, Multi-line text, Rich text
+- Number, Calculation
+- Checkbox, Radio button, Dropdown, Multi-select
+- Date, Time, DateTime
+- Link
+
+### Field Configuration Updates and Deployment
+
+Example of type-safe field updates and deployment:
+
+```typescript
+import { Schema } from 'effect';
+import { 
+  SingleLineTextFieldPropertiesSchema,
+  NumberFieldPropertiesSchema,
+  type SingleLineTextFieldProperties,
+  type NumberFieldProperties 
+} from 'kintone-effect-schema';
+
+// 1. Add new fields
+const newTextField: SingleLineTextFieldProperties = Schema.decodeUnknownSync(
+  SingleLineTextFieldPropertiesSchema
+)({
+  type: 'SINGLE_LINE_TEXT',
+  code: 'company_name',
+  label: 'Company Name',
+  required: true,
+  unique: true,
+  minLength: '1',
+  maxLength: '100',
+  defaultValue: ''
+});
+
+// 2. Update field configuration
+await client.app.updateFormFields({
+  app: 1,
+  properties: {
+    company_name: newTextField,
+  }
+});
+
+// 3. Deploy the app
+const { revision } = await client.app.deployApp({
+  apps: [{ app: 1 }]
+});
+
+console.log(`App deployment started. Revision: ${revision}`);
+```
 
 ## API Reference
 
 ### Schemas
 
+#### Field Value Schemas
 Schema definitions for each field type:
 - `SingleLineTextFieldSchema`, `NumberFieldSchema`, `DateFieldSchema`, etc.
 - `KintoneFieldSchema` - Union of all field types
 - `KintoneRecordSchema` - Schema for entire record
 
+#### Form Field Configuration Schemas
+- `SingleLineTextFieldPropertiesSchema`, `NumberFieldPropertiesSchema`, etc. - Configuration schemas for each field type
+- `SubtableFieldPropertiesSchema` - Subtable field configuration schema
+- `GetFormFieldsResponseSchema` - Form Fields API response schema
+- `KintoneFieldPropertiesSchema` - Union of all field configuration types
+
 ### Type Definitions
 
 TypeScript types inferred from schemas:
+
+#### Field Value Types
 ```typescript
 import type { 
   SingleLineTextField, 
@@ -347,7 +495,25 @@ type TextField = SingleLineTextField; // { type: 'SINGLE_LINE_TEXT', value: stri
 type NumField = NumberField; // { type: 'NUMBER', value: string | null }
 
 // Union type
-type AnyField = KintoneField; // Union of all 28+ field types
+type AnyField = KintoneField; // Union of all field types
+```
+
+#### Field Configuration Types
+```typescript
+import type {
+  SingleLineTextFieldProperties,
+  NumberFieldProperties,
+  SubtableFieldProperties,
+  GetFormFieldsResponse,
+  KintoneFieldProperties
+} from 'kintone-effect-schema';
+
+// Individual field configuration types
+type TextFieldProps = SingleLineTextFieldProperties;
+type NumberFieldProps = NumberFieldProperties;
+
+// API response type
+type FormFields = GetFormFieldsResponse;
 ```
 
 ### Decoder Functions

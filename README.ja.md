@@ -1,6 +1,6 @@
 # kintone-effect-schema
 
-Effect-TS を使用した kintone フィールドのスキーマ定義ライブラリです。kintone API の複雑な型定義と空値の扱いを正規化し、型安全な開発を実現します。
+Effect-TS を使用した kintone フィールドのスキーマ定義ライブラリです。kintone API の複雑な型定義と空値の扱いを正規化し、型安全な開発を実現します。フォーム設定 API にも対応し、アプリの設定情報も型安全に扱えます。
 
 ## 特徴
 
@@ -9,6 +9,7 @@ Effect-TS を使用した kintone フィールドのスキーマ定義ライブ�
 - ✅ **書き込みバリデーション** - 空値を設定できないフィールドを自動検証
 - 📦 **全フィールドタイプ対応** - kintone の全フィールドタイプをサポート
 - 🎯 **Effect-TS** - 強力なスキーマバリデーション機能
+- ⚙️ **フォーム設定 API 対応** - アプリのフィールド設定情報も型安全に
 
 ## なぜ Effect-TS Schema なのか？
 
@@ -182,11 +183,11 @@ Effect-TS を正しく使用するために、以下の TypeScript 設定が必�
 
 ```typescript
 import { Schema } from 'effect';
-import { 
-  SingleLineTextFieldSchema, 
+import {
+  SingleLineTextFieldSchema,
   NumberFieldSchema,
   type SingleLineTextField,
-  type NumberField 
+  type NumberField,
 } from 'kintone-effect-schema';
 
 // テキストフィールドのパース
@@ -194,7 +195,8 @@ const textField = {
   type: 'SINGLE_LINE_TEXT',
   value: 'Hello, kintone!',
 };
-const parsedText: SingleLineTextField = Schema.decodeUnknownSync(SingleLineTextFieldSchema)(textField);
+const parsedText: SingleLineTextField =
+  Schema.decodeUnknownSync(SingleLineTextFieldSchema)(textField);
 // parsedText.type は 'SINGLE_LINE_TEXT' リテラル型
 // parsedText.value は string 型
 
@@ -385,6 +387,7 @@ const updateData = {
 - `STATUS_ASSIGNEE` - 作業者
 - `FILE` - 添付ファイル
 - `LOOKUP` - ルックアップ
+- `REFERENCE_TABLE` - 関連レコード一覧
 
 ### システムフィールド
 
@@ -396,28 +399,276 @@ const updateData = {
 - `MODIFIER` - 更新者
 - `UPDATED_TIME` - 更新日時
 
-### その他
+### レイアウトフィールド
 
 - `SUBTABLE` - テーブル
+- `GROUP` - グループ
+
+## フォームフィールド設定スキーマ（新機能！）
+
+kintone のフォーム設定 API に対応したスキーマ定義を提供しています。これにより、アプリのフィールド設定情報を型安全に扱えます。
+
+### フィールド設定の取得
+
+```typescript
+import { Schema } from 'effect';
+import { GetFormFieldsResponseSchema, type GetFormFieldsResponse } from 'kintone-effect-schema';
+import { KintoneRestAPIClient } from '@kintone/rest-api-client';
+
+// フォームフィールド取得APIのレスポンスをパース
+const client = new KintoneRestAPIClient({
+  baseUrl: 'https://example.cybozu.com',
+  auth: { /* 認証情報 */ }
+});
+
+const apiResponse = await client.app.getFormFields({
+  app: 1,
+}); // 実際のAPI呼び出し
+const formFields: GetFormFieldsResponse = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(
+  apiResponse
+);
+
+// 型安全にフィールド設定にアクセス
+Object.entries(formFields.properties).forEach(([fieldCode, fieldProps]) => {
+  console.log(`フィールドコード: ${fieldCode}`);
+  console.log(`フィールドタイプ: ${fieldProps.type}`);
+  console.log(`ラベル: ${fieldProps.label}`);
+
+  // フィールドタイプ別の処理
+  switch (fieldProps.type) {
+    case 'SINGLE_LINE_TEXT':
+      console.log(`最大文字数: ${fieldProps.maxLength}`);
+      console.log(`必須: ${fieldProps.required}`);
+      break;
+    case 'NUMBER':
+      console.log(`単位: ${fieldProps.unit}`);
+      console.log(`単位の位置: ${fieldProps.unitPosition}`);
+      break;
+    case 'SUBTABLE':
+      // サブテーブル内のフィールド
+      Object.entries(fieldProps.fields).forEach(([subCode, subField]) => {
+        console.log(`  サブフィールド: ${subCode} - ${subField.type}`);
+      });
+      break;
+  }
+});
+```
+
+### フィールド設定の型定義
+
+各フィールドタイプに対応した型定義を提供：
+
+```typescript
+import type {
+  SingleLineTextFieldProperties,
+  NumberFieldProperties,
+  SubtableFieldProperties,
+  // ... その他のフィールドタイプ
+} from 'kintone-effect-schema';
+
+// 型安全なフィールド設定の作成
+const textFieldProps: SingleLineTextFieldProperties = {
+  type: 'SINGLE_LINE_TEXT',
+  code: 'company_name',
+  label: '会社名',
+  required: true,
+  unique: true,
+  minLength: '1',
+  maxLength: '100',
+  defaultValue: '',
+};
+```
+
+### フィールドコードのバリデーション
+
+kintone のフィールドコードには以下の制約があり、自動的に検証されます：
+
+- 使用可能文字：ひらがな、カタカナ、漢字、英数字、アンダースコア、中黒、通貨記号
+- 予約語（ステータス、作業者、カテゴリー、\_\_ROOT\_\_、not）は使用不可
+- 先頭に半角数字は使用不可
+
+### サブテーブルの制約
+
+サブテーブル内では以下のフィールドタイプのみ使用可能です：
+
+- 文字列（1 行）、文字列（複数行）、リッチテキスト
+- 数値、計算
+- チェックボックス、ラジオボタン、ドロップダウン、複数選択
+- 日付、時刻、日時
+- リンク
+
+### フィールド設定の更新とデプロイ
+
+型安全にフィールド設定を更新し、デプロイする例：
+
+```typescript
+import { Schema } from 'effect';
+import { 
+  SingleLineTextFieldPropertiesSchema,
+  NumberFieldPropertiesSchema,
+  type SingleLineTextFieldProperties,
+  type NumberFieldProperties 
+} from 'kintone-effect-schema';
+import { KintoneRestAPIClient } from '@kintone/rest-api-client';
+
+const client = new KintoneRestAPIClient({
+  baseUrl: 'https://example.cybozu.com',
+  auth: { /* 認証情報 */ }
+});
+
+// 1. 新しいフィールドの追加
+const newTextField: SingleLineTextFieldProperties = Schema.decodeUnknownSync(
+  SingleLineTextFieldPropertiesSchema
+)({
+  type: 'SINGLE_LINE_TEXT',
+  code: 'company_name',
+  label: '会社名',
+  required: true,
+  unique: true,
+  minLength: '1',
+  maxLength: '100',
+  defaultValue: ''
+});
+
+const newNumberField: NumberFieldProperties = Schema.decodeUnknownSync(
+  NumberFieldPropertiesSchema
+)({
+  type: 'NUMBER',
+  code: 'annual_revenue',
+  label: '年間売上高',
+  required: false,
+  defaultValue: '0',
+  digit: true,
+  unit: '円',
+  unitPosition: 'AFTER'
+});
+
+// 2. フィールド設定の更新
+await client.app.updateFormFields({
+  app: 1,
+  properties: {
+    company_name: newTextField,
+    annual_revenue: newNumberField
+  }
+});
+
+// 3. アプリのデプロイ
+const { revision } = await client.app.deployApp({
+  apps: [{ app: 1 }]
+});
+
+console.log(`アプリのデプロイを開始しました。リビジョン: ${revision}`);
+
+// 4. デプロイ状態の確認
+const deployStatus = await client.app.getDeployStatus({
+  apps: [1]
+});
+
+console.log(`デプロイ状態: ${deployStatus.apps[0].status}`);
+
+// 5. 既存フィールドの設定変更
+const currentFields = await client.app.getFormFields({ app: 1 });
+
+// 既存フィールドを型安全に更新
+if (currentFields.properties.title?.type === 'SINGLE_LINE_TEXT') {
+  const updatedTitleField = {
+    ...currentFields.properties.title,
+    required: true,
+    maxLength: '200'
+  };
+  
+  // スキーマでバリデーション
+  const validatedField = Schema.decodeUnknownSync(
+    SingleLineTextFieldPropertiesSchema
+  )(updatedTitleField);
+  
+  await client.app.updateFormFields({
+    app: 1,
+    properties: {
+      title: validatedField
+    }
+  });
+}
+```
+
+### フィールドのバックアップとリストア
+
+アプリ設定のバックアップとリストアの例：
+
+```typescript
+import { Schema } from 'effect';
+import { GetFormFieldsResponseSchema } from 'kintone-effect-schema';
+import * as fs from 'fs/promises';
+
+// バックアップ
+async function backupFormFields(appId: number) {
+  const fields = await client.app.getFormFields({ app: appId });
+  
+  // スキーマでバリデーションして正規化
+  const validated = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(fields);
+  
+  // JSONファイルとして保存
+  await fs.writeFile(
+    `backup-app-${appId}-${Date.now()}.json`,
+    JSON.stringify(validated, null, 2)
+  );
+  
+  console.log('フィールド設定をバックアップしました');
+}
+
+// リストア
+async function restoreFormFields(appId: number, backupFile: string) {
+  const backup = JSON.parse(await fs.readFile(backupFile, 'utf-8'));
+  
+  // スキーマでバリデーション
+  const validated = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(backup);
+  
+  // フィールド設定を更新
+  await client.app.updateFormFields({
+    app: appId,
+    properties: validated.properties
+  });
+  
+  // デプロイ
+  await client.app.deployApp({
+    apps: [{ app: appId }]
+  });
+  
+  console.log('フィールド設定をリストアしました');
+}
+```
 
 ## API リファレンス
 
 ### スキーマ
 
+#### フィールド値スキーマ
+
 各フィールドタイプに対応したスキーマ定義：
+
 - `SingleLineTextFieldSchema`, `NumberFieldSchema`, `DateFieldSchema` など
 - `KintoneFieldSchema` - 全フィールドタイプの Union
 - `KintoneRecordSchema` - レコード全体のスキーマ
 
+#### フォームフィールド設定スキーマ
+
+- `SingleLineTextFieldPropertiesSchema`, `NumberFieldPropertiesSchema` など各フィールドの設定スキーマ
+- `SubtableFieldPropertiesSchema` - サブテーブルフィールドの設定スキーマ
+- `GetFormFieldsResponseSchema` - フォームフィールド取得 API のレスポンススキーマ
+- `KintoneFieldPropertiesSchema` - 全フィールドタイプの設定の Union
+
 ### 型定義
 
 スキーマから推論される TypeScript 型：
+
+#### フィールド値の型
+
 ```typescript
-import type { 
-  SingleLineTextField, 
+import type {
+  SingleLineTextField,
   NumberField,
   KintoneField,
-  KintoneRecord 
+  KintoneRecord,
 } from 'kintone-effect-schema';
 
 // 個別フィールドの型
@@ -425,7 +676,26 @@ type TextField = SingleLineTextField; // { type: 'SINGLE_LINE_TEXT', value: stri
 type NumField = NumberField; // { type: 'NUMBER', value: string | null }
 
 // Union 型
-type AnyField = KintoneField; // 全28種類のフィールドの Union
+type AnyField = KintoneField; // 全フィールドタイプの Union
+```
+
+#### フィールド設定の型
+
+```typescript
+import type {
+  SingleLineTextFieldProperties,
+  NumberFieldProperties,
+  SubtableFieldProperties,
+  GetFormFieldsResponse,
+  KintoneFieldProperties,
+} from 'kintone-effect-schema';
+
+// 個別フィールド設定の型
+type TextFieldProps = SingleLineTextFieldProperties;
+type NumberFieldProps = NumberFieldProperties;
+
+// APIレスポンスの型
+type FormFields = GetFormFieldsResponse;
 ```
 
 ### デコーダー関数

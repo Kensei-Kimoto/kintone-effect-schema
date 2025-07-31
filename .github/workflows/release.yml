@@ -27,6 +27,15 @@ jobs:
     - name: Build
       run: npm run build
     
+    - name: Extract version changelog
+      id: changelog
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        CHANGELOG=$(awk -v ver="[$VERSION]" '$0 ~ ver {f=1; next} /^## \[/ {f=0} f' CHANGELOG.md | sed '/^$/d')
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
     - name: Create Release
       uses: actions/create-release@v1
       env:
@@ -35,9 +44,15 @@ jobs:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
         body: |
-          Changes in this Release
-          - First Change
-          - Second Change
+          ## What's Changed
+          ${{ steps.changelog.outputs.CHANGELOG }}
+          
+          ## Installation
+          ```bash
+          npm install kintone-effect-schema@${{ github.ref_name }}
+          ```
+          
+          **Full Changelog**: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md
         draft: false
         prerelease: false
     
