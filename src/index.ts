@@ -162,3 +162,9 @@ export type KintoneRecordWriteData = Record<string, { value: unknown }>
 
 // フォームフィールド設定スキーマのエクスポート
 export * from './schemas/form/index.js'
+
+// フィールド設定からTypeScriptコードへの変換関数
+export { 
+  fieldConfigToTypeScriptCode,
+  fieldsConfigToTypeScriptCode 
+} from './utils/field-config-to-typescript-code.js'

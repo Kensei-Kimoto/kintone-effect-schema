@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2025-02-03
+
+### Added
+- Field configuration to TypeScript code generation utilities
+  - `fieldConfigToTypeScriptCode` - Convert single field configuration to TypeScript code
+  - `fieldsConfigToTypeScriptCode` - Convert multiple field configurations to TypeScript code
+  - Support for Japanese field codes as valid TypeScript identifiers
+  - Automatic handling of special characters in field codes
+  - Proper escaping and formatting of generated code
+
+### Changed
+- Japanese field codes are now preserved as-is in generated variable names (e.g., `会社名Field`)
+- Field codes with invalid JavaScript identifier characters are automatically sanitized
+
+### Fixed
+- Improved escaping of string values in generated TypeScript code
+- Better handling of undefined/null values in field configurations
+- Fixed lint errors and test failures
+
 ## [0.2.0] - 2025-01-31
 
 ### Added

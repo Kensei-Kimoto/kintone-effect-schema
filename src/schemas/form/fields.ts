@@ -505,32 +505,54 @@ export const GetFormFieldsResponseSchema = Schema.Struct({
 });
 
 // 型定義のエクスポート
-export type SingleLineTextFieldProperties = Schema.Schema.Type<typeof SingleLineTextFieldPropertiesSchema>;
-export type MultiLineTextFieldProperties = Schema.Schema.Type<typeof MultiLineTextFieldPropertiesSchema>;
+export type SingleLineTextFieldProperties = Schema.Schema.Type<
+  typeof SingleLineTextFieldPropertiesSchema
+>;
+export type MultiLineTextFieldProperties = Schema.Schema.Type<
+  typeof MultiLineTextFieldPropertiesSchema
+>;
 export type RichTextFieldProperties = Schema.Schema.Type<typeof RichTextFieldPropertiesSchema>;
 export type NumberFieldProperties = Schema.Schema.Type<typeof NumberFieldPropertiesSchema>;
 export type CalcFieldProperties = Schema.Schema.Type<typeof CalcFieldPropertiesSchema>;
-export type RadioButtonFieldProperties = Schema.Schema.Type<typeof RadioButtonFieldPropertiesSchema>;
+export type RadioButtonFieldProperties = Schema.Schema.Type<
+  typeof RadioButtonFieldPropertiesSchema
+>;
 export type CheckBoxFieldProperties = Schema.Schema.Type<typeof CheckBoxFieldPropertiesSchema>;
-export type MultiSelectFieldProperties = Schema.Schema.Type<typeof MultiSelectFieldPropertiesSchema>;
+export type MultiSelectFieldProperties = Schema.Schema.Type<
+  typeof MultiSelectFieldPropertiesSchema
+>;
 export type DropDownFieldProperties = Schema.Schema.Type<typeof DropDownFieldPropertiesSchema>;
 export type DateFieldProperties = Schema.Schema.Type<typeof DateFieldPropertiesSchema>;
 export type TimeFieldProperties = Schema.Schema.Type<typeof TimeFieldPropertiesSchema>;
 export type DateTimeFieldProperties = Schema.Schema.Type<typeof DateTimeFieldPropertiesSchema>;
 export type LinkFieldProperties = Schema.Schema.Type<typeof LinkFieldPropertiesSchema>;
 export type UserSelectFieldProperties = Schema.Schema.Type<typeof UserSelectFieldPropertiesSchema>;
-export type OrganizationSelectFieldProperties = Schema.Schema.Type<typeof OrganizationSelectFieldPropertiesSchema>;
-export type GroupSelectFieldProperties = Schema.Schema.Type<typeof GroupSelectFieldPropertiesSchema>;
+export type OrganizationSelectFieldProperties = Schema.Schema.Type<
+  typeof OrganizationSelectFieldPropertiesSchema
+>;
+export type GroupSelectFieldProperties = Schema.Schema.Type<
+  typeof GroupSelectFieldPropertiesSchema
+>;
 export type FileFieldProperties = Schema.Schema.Type<typeof FileFieldPropertiesSchema>;
 export type LookupFieldProperties = Schema.Schema.Type<typeof LookupFieldPropertiesSchema>;
-export type ReferenceTableFieldProperties = Schema.Schema.Type<typeof ReferenceTableFieldPropertiesSchema>;
-export type RecordNumberFieldProperties = Schema.Schema.Type<typeof RecordNumberFieldPropertiesSchema>;
+export type ReferenceTableFieldProperties = Schema.Schema.Type<
+  typeof ReferenceTableFieldPropertiesSchema
+>;
+export type RecordNumberFieldProperties = Schema.Schema.Type<
+  typeof RecordNumberFieldPropertiesSchema
+>;
 export type CreatorFieldProperties = Schema.Schema.Type<typeof CreatorFieldPropertiesSchema>;
-export type CreatedTimeFieldProperties = Schema.Schema.Type<typeof CreatedTimeFieldPropertiesSchema>;
+export type CreatedTimeFieldProperties = Schema.Schema.Type<
+  typeof CreatedTimeFieldPropertiesSchema
+>;
 export type ModifierFieldProperties = Schema.Schema.Type<typeof ModifierFieldPropertiesSchema>;
-export type UpdatedTimeFieldProperties = Schema.Schema.Type<typeof UpdatedTimeFieldPropertiesSchema>;
+export type UpdatedTimeFieldProperties = Schema.Schema.Type<
+  typeof UpdatedTimeFieldPropertiesSchema
+>;
 export type StatusFieldProperties = Schema.Schema.Type<typeof StatusFieldPropertiesSchema>;
-export type StatusAssigneeFieldProperties = Schema.Schema.Type<typeof StatusAssigneeFieldPropertiesSchema>;
+export type StatusAssigneeFieldProperties = Schema.Schema.Type<
+  typeof StatusAssigneeFieldPropertiesSchema
+>;
 export type CategoryFieldProperties = Schema.Schema.Type<typeof CategoryFieldPropertiesSchema>;
 export type SubtableFieldProperties = Schema.Schema.Type<typeof SubtableFieldPropertiesSchema>;
 export type GroupFieldProperties = Schema.Schema.Type<typeof GroupFieldPropertiesSchema>;
