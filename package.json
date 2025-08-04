@@ -1,6 +1,6 @@
 {
   "name": "kintone-effect-schema",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Type-safe kintone field schema definitions with Effect-TS. Normalize empty values, validate writes, and ensure runtime type safety for kintone API responses.",
   "keywords": [
     "kintone",
