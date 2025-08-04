@@ -12,6 +12,8 @@ import {
   KintoneFieldPropertiesSchema,
   SpacerFieldPropertiesSchema,
   LabelFieldPropertiesSchema,
+  SystemIdFieldPropertiesSchema,
+  SystemRevisionFieldPropertiesSchema,
 } from '../../../src/schemas/form/fields.js'
 
 describe('Kintone Form Field Properties Schemas', () => {
@@ -323,6 +325,23 @@ describe('Kintone Form Field Properties Schemas', () => {
       })
     })
 
+    it('should accept system fields with $ prefix', () => {
+      const systemFieldCodes = [
+        '$id',
+        '$revision',
+        '$custom_system_field',
+      ]
+
+      systemFieldCodes.forEach((code) => {
+        const input = {
+          type: 'SINGLE_LINE_TEXT',
+          code,
+          label: 'Test',
+        }
+        expect(() => Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)).not.toThrow()
+      })
+    })
+
     it('should reject invalid characters', () => {
       const invalidCodes = [
         'field-with-hyphen', // Hyphen not allowed
@@ -342,7 +361,18 @@ describe('Kintone Form Field Properties Schemas', () => {
     })
 
     it('should reject all reserved words', () => {
-      const reservedWords = ['ステータス', '作業者', 'カテゴリー', '__ROOT__', 'not']
+      const reservedWords = [
+        'ステータス',
+        '作業者',
+        'カテゴリー',
+        '__ROOT__',
+        'not',
+        'レコード番号',
+        '作成者',
+        '作成日時',
+        '更新者',
+        '更新日時',
+      ]
 
       reservedWords.forEach((code) => {
         const input = {
@@ -445,6 +475,74 @@ describe('Kintone Form Field Properties Schemas', () => {
         size: {
           width: 200,
         },
+      }
+      
+      const result = Schema.decodeUnknownSync(KintoneFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+  })
+
+  describe('SystemIdFieldPropertiesSchema', () => {
+    it('should parse valid __ID__ field properties', () => {
+      const input = {
+        type: '__ID__',
+        code: '$id',
+        label: 'レコードID',
+      }
+      
+      const result = Schema.decodeUnknownSync(SystemIdFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should only accept $id as field code', () => {
+      const input = {
+        type: '__ID__',
+        code: 'other_code', // Should be rejected
+        label: 'レコードID',
+      }
+      
+      expect(() => Schema.decodeUnknownSync(SystemIdFieldPropertiesSchema)(input)).toThrow()
+    })
+
+    it('should be included in KintoneFieldPropertiesSchema union', () => {
+      const input = {
+        type: '__ID__',
+        code: '$id',
+        label: 'ID',
+      }
+      
+      const result = Schema.decodeUnknownSync(KintoneFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+  })
+
+  describe('SystemRevisionFieldPropertiesSchema', () => {
+    it('should parse valid __REVISION__ field properties', () => {
+      const input = {
+        type: '__REVISION__',
+        code: '$revision',
+        label: 'リビジョン',
+      }
+      
+      const result = Schema.decodeUnknownSync(SystemRevisionFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should only accept $revision as field code', () => {
+      const input = {
+        type: '__REVISION__',
+        code: 'other_code', // Should be rejected
+        label: 'リビジョン',
+      }
+      
+      expect(() => Schema.decodeUnknownSync(SystemRevisionFieldPropertiesSchema)(input)).toThrow()
+    })
+
+    it('should be included in KintoneFieldPropertiesSchema union', () => {
+      const input = {
+        type: '__REVISION__',
+        code: '$revision',
+        label: 'Revision',
       }
       
       const result = Schema.decodeUnknownSync(KintoneFieldPropertiesSchema)(input)

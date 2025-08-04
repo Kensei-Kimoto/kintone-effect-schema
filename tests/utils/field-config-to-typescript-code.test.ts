@@ -52,6 +52,32 @@ describe('field-config-to-typescript-code', () => {
       expect(result).toContain('code: "field-name_123"')
     })
 
+    it('should handle system fields with $ prefix', () => {
+      const fieldConfig: SingleLineTextFieldProperties = {
+        type: 'SINGLE_LINE_TEXT',
+        code: '$id',
+        label: 'Record ID',
+        required: false
+      }
+      
+      const result = fieldConfigToTypeScriptCode(fieldConfig)
+      expect(result).toContain('export const $idField: SingleLineTextFieldProperties')
+      expect(result).toContain('code: "$id"')
+    })
+
+    it('should handle $revision system field', () => {
+      const fieldConfig: SingleLineTextFieldProperties = {
+        type: 'SINGLE_LINE_TEXT',
+        code: '$revision',
+        label: 'Revision',
+        required: false
+      }
+      
+      const result = fieldConfigToTypeScriptCode(fieldConfig)
+      expect(result).toContain('export const $revisionField: SingleLineTextFieldProperties')
+      expect(result).toContain('code: "$revision"')
+    })
+
     it('should skip undefined values in the output', () => {
       const fieldConfig: SingleLineTextFieldProperties = {
         type: 'SINGLE_LINE_TEXT',
@@ -266,6 +292,41 @@ describe('field-config-to-typescript-code', () => {
       
       // Should use quoted key in app config
       expect(result).toContain('"class": classField')
+    })
+
+    it('should handle system fields with $ prefix in multiple fields', () => {
+      const fieldsConfig = {
+        '$id': {
+          type: 'SINGLE_LINE_TEXT',
+          code: '$id',
+          label: 'Record ID',
+          required: false
+        } as SingleLineTextFieldProperties,
+        '$revision': {
+          type: 'SINGLE_LINE_TEXT',
+          code: '$revision',
+          label: 'Revision',
+          required: false
+        } as SingleLineTextFieldProperties,
+        'normal_field': {
+          type: 'SINGLE_LINE_TEXT',
+          code: 'normal_field',
+          label: 'Normal Field',
+          required: true
+        } as SingleLineTextFieldProperties
+      }
+      
+      const result = fieldsConfigToTypeScriptCode(fieldsConfig)
+      
+      // Check field definitions
+      expect(result).toContain('export const $idField: SingleLineTextFieldProperties')
+      expect(result).toContain('export const $revisionField: SingleLineTextFieldProperties')
+      expect(result).toContain('export const normal_fieldField: SingleLineTextFieldProperties')
+      
+      // Check app config uses quoted keys for system fields
+      expect(result).toContain('"$id": $idField')
+      expect(result).toContain('"$revision": $revisionField')
+      expect(result).toContain('normal_field: normal_fieldField')
     })
   })
 })

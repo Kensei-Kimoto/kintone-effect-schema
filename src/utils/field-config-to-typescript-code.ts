@@ -51,6 +51,8 @@ const FIELD_TYPE_TO_TS_TYPE: Record<string, string> = {
   GROUP: 'GroupFieldProperties',
   RECORD_ID: 'RecordIdFieldProperties',
   REVISION: 'RevisionFieldProperties',
+  __ID__: 'SystemIdFieldProperties',
+  __REVISION__: 'SystemRevisionFieldProperties',
   SPACER: 'SpacerFieldProperties',
   LABEL: 'LabelFieldProperties',
 };
@@ -74,6 +76,13 @@ function toVariableName(code: string): string {
   // The spec allows: ID_Start (including Japanese) at the beginning, and ID_Continue for the rest
   // We'll keep the original field code as much as possible
   
+  // Special handling for system fields starting with $
+  // $id -> $idField, $revision -> $revisionField
+  if (code.startsWith('$')) {
+    // $ is valid in JavaScript identifiers, so we can keep it
+    return code + 'Field';
+  }
+  
   // Check if it starts with a number (not allowed in JS identifiers)
   if (/^[0-9]/.test(code)) {
     // Prefix with underscore if starts with number
@@ -95,7 +104,7 @@ function toVariableName(code: string): string {
   // Remove consecutive underscores
   varName = varName.replace(/_+/g, '_');
   
-  // Remove leading/trailing underscores
+  // Remove leading/trailing underscores (but preserve $ at the beginning)
   varName = varName.replace(/^_+|_+$/g, '');
   
   // If empty or starts with number, prefix with 'field'
@@ -305,7 +314,8 @@ export function fieldsConfigToTypeScriptCode(
   
   // Generate app fields config object
   const configEntries = fieldVariables.map(({ code, varName }) => {
-    const needsQuotes = !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(code) || isReservedWord(code);
+    // Quote if: starts with $, contains invalid characters, or is a reserved word
+    const needsQuotes = code.startsWith('$') || !/^[a-zA-Z_][a-zA-Z0-9_$]*$/.test(code) || isReservedWord(code);
     const key = needsQuotes ? JSON.stringify(code) : code;
     return `    ${key}: ${varName}`;
   });

@@ -11,6 +11,7 @@ import { Schema } from 'effect';
 // - 半角の「･」（中黒）
 // - 全角の「・」（中黒）
 // - 全角の通貨記号（＄や￥など）
+// - 半角の「$」（ドル記号） - システムフィールド用（$id, $revision など）
 //
 // 制限事項:
 // - 予約語（ステータス、作業者、カテゴリー、__ROOT__、not）は使用不可
@@ -18,11 +19,22 @@ import { Schema } from 'effect';
 // - フォーム内での重複は不可（保存時に「_通し番号」が自動付与される）
 
 // 予約語のリスト
-const RESERVED_FIELD_CODES = new Set(['ステータス', '作業者', 'カテゴリー', '__ROOT__', 'not']);
+const RESERVED_FIELD_CODES = new Set([
+  'ステータス',
+  '作業者',
+  'カテゴリー',
+  '__ROOT__',
+  'not',
+  'レコード番号',
+  '作成者',
+  '作成日時',
+  '更新者',
+  '更新日時',
+]);
 
 const KintoneFieldCodeSchema = Schema.String.pipe(
   Schema.pattern(
-    /^[ぁ-ん\u30A0-\u30FF\u3040-\u309F\u4E00-\u9FAF\uFF66-\uFF9FＡ-Ｚａ-ｚ０-９A-Za-z0-9_＿･・＄￥€￡￦¥]+$/
+    /^[$ぁ-ん\u30A0-\u30FF\u3040-\u309F\u4E00-\u9FAF\uFF66-\uFF9FＡ-Ｚａ-ｚ０-９A-Za-z0-9_＿･・＄￥€￡￦¥]+$/
   ),
   Schema.minLength(1),
   Schema.filter((value) => !RESERVED_FIELD_CODES.has(value)),
@@ -442,6 +454,19 @@ export const RevisionFieldPropertiesSchema = Schema.Struct({
   label: Schema.String,
 });
 
+// 特殊なシステムフィールド（$id, $revision）
+export const SystemIdFieldPropertiesSchema = Schema.Struct({
+  type: Schema.Literal('__ID__'),
+  code: Schema.Literal('$id'),
+  label: Schema.String,
+});
+
+export const SystemRevisionFieldPropertiesSchema = Schema.Struct({
+  type: Schema.Literal('__REVISION__'),
+  code: Schema.Literal('$revision'),
+  label: Schema.String,
+});
+
 export const SpacerFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('SPACER'),
   elementId: Schema.String,
@@ -491,6 +516,8 @@ export const KintoneFieldPropertiesSchema = Schema.Union(
   GroupFieldPropertiesSchema,
   RecordIdFieldPropertiesSchema,
   RevisionFieldPropertiesSchema,
+  SystemIdFieldPropertiesSchema,
+  SystemRevisionFieldPropertiesSchema,
   SpacerFieldPropertiesSchema,
   LabelFieldPropertiesSchema
 );
@@ -558,6 +585,8 @@ export type SubtableFieldProperties = Schema.Schema.Type<typeof SubtableFieldPro
 export type GroupFieldProperties = Schema.Schema.Type<typeof GroupFieldPropertiesSchema>;
 export type RecordIdFieldProperties = Schema.Schema.Type<typeof RecordIdFieldPropertiesSchema>;
 export type RevisionFieldProperties = Schema.Schema.Type<typeof RevisionFieldPropertiesSchema>;
+export type SystemIdFieldProperties = Schema.Schema.Type<typeof SystemIdFieldPropertiesSchema>;
+export type SystemRevisionFieldProperties = Schema.Schema.Type<typeof SystemRevisionFieldPropertiesSchema>;
 export type SpacerFieldProperties = Schema.Schema.Type<typeof SpacerFieldPropertiesSchema>;
 export type LabelFieldProperties = Schema.Schema.Type<typeof LabelFieldPropertiesSchema>;
 export type KintoneFieldProperties = Schema.Schema.Type<typeof KintoneFieldPropertiesSchema>;
