@@ -735,4 +735,95 @@ describe('Kintone Form Field Properties Schemas', () => {
       expect(result).toEqual(input)
     })
   })
+
+  describe('Empty string handling', () => {
+    it('should accept empty strings in numeric properties (subtable case)', () => {
+      const input = {
+        properties: {
+          'relocations': {
+            type: 'SUBTABLE',
+            code: 'relocations',
+            fields: {
+              'from_location': {
+                type: 'SINGLE_LINE_TEXT',
+                code: 'from_location',
+                label: '移転元',
+                required: true,
+                minLength: '',     // 空文字列
+                maxLength: '255',  // 数値文字列
+              },
+              'to_location': {
+                type: 'SINGLE_LINE_TEXT',
+                code: 'to_location',
+                label: '移転先',
+                required: true,
+                minLength: '',    // 空文字列
+                maxLength: '',    // 空文字列
+              },
+              'cost': {
+                type: 'NUMBER',
+                code: 'cost',
+                label: '費用',
+                minValue: '0',     // 数値文字列
+                maxValue: '',      // 空文字列
+                displayScale: '',  // 空文字列
+              },
+            },
+          },
+        },
+        revision: '42'
+      }
+      
+      const result = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(input)
+      expect(result).toEqual(input)
+      
+      // 詳細確認
+      const relocations = result.properties.relocations
+      if (relocations.type === 'SUBTABLE') {
+        const fromLocation = relocations.fields.from_location
+        const cost = relocations.fields.cost
+        
+        expect(fromLocation.minLength).toBe('')
+        expect(fromLocation.maxLength).toBe('255')
+        if (cost.type === 'NUMBER') {
+          expect(cost.maxValue).toBe('')
+          expect(cost.displayScale).toBe('')
+        }
+      }
+    })
+
+    it('should accept fields with both empty strings and undefined values', () => {
+      const input = {
+        type: 'SINGLE_LINE_TEXT',
+        code: 'test_field',
+        label: 'テストフィールド',
+        minLength: '',  // 空文字列
+        maxLength: '100'  // 数値文字列
+        // defaultValue は undefined (プロパティなし)
+      }
+      
+      const result = Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)
+      expect(result.minLength).toBe('')
+      expect(result.maxLength).toBe('100')
+      expect(result.defaultValue).toBeUndefined()
+    })
+
+    it('should accept NUMBER field with mixed empty strings and values', () => {
+      const input = {
+        type: 'NUMBER',
+        code: 'amount',
+        label: '金額',
+        minValue: '',      // 空文字列
+        maxValue: '1000',  // 数値文字列
+        displayScale: '',  // 空文字列
+        unit: '円',
+        unitPosition: 'AFTER'
+      }
+      
+      const result = Schema.decodeUnknownSync(NumberFieldPropertiesSchema)(input)
+      expect(result.minValue).toBe('')
+      expect(result.maxValue).toBe('1000')
+      expect(result.displayScale).toBe('')
+    })
+  })
 })

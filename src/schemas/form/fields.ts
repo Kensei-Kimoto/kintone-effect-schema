@@ -3,7 +3,11 @@ import { Schema } from 'effect';
 // 数値文字列スキーマ（kintone APIは数値を文字列として返す）
 const NumericStringSchema = Schema.String;
 
-// オプショナルな数値文字列スキーマ
+// オプショナルな数値文字列スキーマ（空文字列も許可）
+// kintone APIは「設定なし」を以下のパターンで返す：
+// - プロパティなし（undefined）
+// - 空文字列 ""（特にサブテーブル内フィールド）
+// - 数値文字列 "100"
 const OptionalNumericStringSchema = Schema.optional(Schema.String);
 
 
