@@ -279,6 +279,116 @@ describe('Kintone Form Field Properties Schemas', () => {
       const result = Schema.decodeUnknownSync(SubtableFieldPropertiesSchema)(input)
       expect(result).toEqual(input)
     })
+
+    it('should parse subtable with USER_SELECT field having empty array defaultValue', () => {
+      const input = {
+        type: 'SUBTABLE',
+        code: 'relocations',
+        fields: {
+          registered_by: {
+            type: 'USER_SELECT',
+            code: 'registered_by',
+            label: '登録者',
+            noLabel: false,
+            required: true,
+            entities: [], // 空配列（サブテーブルでは必ず存在）
+            defaultValue: [], // 空配列（サブテーブルでは必ず存在）
+          },
+          text_field: {
+            type: 'SINGLE_LINE_TEXT',
+            code: 'text_field',
+            label: 'テキスト',
+            noLabel: false,
+            required: false,
+            defaultValue: '',
+            unique: false,
+            minLength: '',
+            maxLength: '',
+            expression: '',
+            hideExpression: false,
+          },
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SubtableFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse subtable with USER_SELECT field having populated defaultValue', () => {
+      const input = {
+        type: 'SUBTABLE',
+        code: 'assignments',
+        fields: {
+          assignee: {
+            type: 'USER_SELECT',
+            code: 'assignee',
+            label: '担当者',
+            noLabel: false,
+            required: true,
+            entities: [
+              { type: 'USER', code: 'user1' },
+              { type: 'GROUP', code: 'group1' },
+            ],
+            defaultValue: [
+              { type: 'USER', code: 'default_user' },
+            ],
+          },
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SubtableFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse subtable with ORGANIZATION_SELECT and GROUP_SELECT fields', () => {
+      const input = {
+        type: 'SUBTABLE',
+        code: 'approvals',
+        fields: {
+          org_select: {
+            type: 'ORGANIZATION_SELECT',
+            code: 'org_select',
+            label: '承認組織',
+            noLabel: false,
+            required: false,
+            entities: [],
+            defaultValue: [],
+          },
+          group_select: {
+            type: 'GROUP_SELECT',
+            code: 'group_select',
+            label: '承認グループ',
+            noLabel: false,
+            required: false,
+            entities: [],
+            defaultValue: [],
+          },
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SubtableFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse subtable with FILE field', () => {
+      const input = {
+        type: 'SUBTABLE',
+        code: 'attachments',
+        fields: {
+          file_upload: {
+            type: 'FILE',
+            code: 'file_upload',
+            label: 'ファイル',
+            noLabel: false,
+            required: false,
+            thumbnailSize: '', // サブテーブルでは空文字列として存在
+          },
+        },
+      }
+      
+      const result = Schema.decodeUnknownSync(SubtableFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
   })
 
   describe('GetFormFieldsResponseSchema', () => {
@@ -822,7 +932,7 @@ describe('Kintone Form Field Properties Schemas', () => {
                 code: 'to_location',
                 label: '移転先',
                 noLabel: false,
-                required: true,
+                required: true,  
                 defaultValue: '',
                 unique: false,
                 minLength: '',    // 空文字列
@@ -865,6 +975,57 @@ describe('Kintone Form Field Properties Schemas', () => {
         if (cost.type === 'NUMBER') {
           expect(cost.maxValue).toBe('')
           expect(cost.displayScale).toBe('')
+        }
+      }
+    })
+
+    it('should accept subtable with USER_SELECT field having empty array (real API case)', () => {
+      const input = {
+        properties: {
+          'relocations': {
+            type: 'SUBTABLE',
+            code: 'relocations',
+            fields: {
+              'registered_by': {
+                type: 'USER_SELECT',
+                code: 'registered_by',
+                label: '登録者',
+                noLabel: false,
+                required: false,
+                entities: [], // 実際のkintone APIでは空配列
+                defaultValue: [], // 実際のkintone APIでは空配列
+              },
+              'location': {
+                type: 'SINGLE_LINE_TEXT',
+                code: 'location',
+                label: '場所',
+                noLabel: false,
+                required: false,
+                defaultValue: '',
+                unique: false,
+                minLength: '',
+                maxLength: '',
+                expression: '',
+                hideExpression: false,
+              },
+            },
+          },
+        },
+        revision: '42'
+      }
+      
+      const result = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(input)
+      expect(result).toEqual(input)
+      
+      // 詳細確認：実際のAPIレスポンスと同じ構造
+      const relocations = result.properties.relocations
+      if (relocations.type === 'SUBTABLE') {
+        const registeredBy = relocations.fields.registered_by
+        if (registeredBy.type === 'USER_SELECT') {
+          expect(registeredBy.defaultValue).toEqual([])
+          expect(registeredBy.entities).toEqual([])
+          expect(Array.isArray(registeredBy.defaultValue)).toBe(true)
+          expect(registeredBy.defaultValue.length).toBe(0)
         }
       }
     })

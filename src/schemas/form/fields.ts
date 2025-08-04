@@ -583,6 +583,64 @@ export const SubtableLinkFieldPropertiesSchema = Schema.extend(
   })
 );
 
+// サブテーブル用USER_SELECT
+export const SubtableUserSelectFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('USER_SELECT'),
+    entities: Schema.Array(EntitySchema), // サブテーブルでは必ず存在（空配列の場合もある）
+    defaultValue: Schema.Array(
+      Schema.Struct({
+        type: Schema.Union(
+          Schema.Literal('USER'),
+          Schema.Literal('ORGANIZATION'),
+          Schema.Literal('GROUP')
+        ),
+        code: UserFieldCodeSchema,
+      })
+    ), // サブテーブルでは必ず存在（空配列の場合もある）
+  })
+);
+
+// サブテーブル用ORGANIZATION_SELECT
+export const SubtableOrganizationSelectFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('ORGANIZATION_SELECT'),
+    entities: Schema.Array(EntitySchema), // サブテーブルでは必ず存在（空配列の場合もある）
+    defaultValue: Schema.Array(
+      Schema.Struct({
+        type: Schema.Literal('ORGANIZATION'),
+        code: UserFieldCodeSchema,
+      })
+    ), // サブテーブルでは必ず存在（空配列の場合もある）
+  })
+);
+
+// サブテーブル用GROUP_SELECT
+export const SubtableGroupSelectFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('GROUP_SELECT'),
+    entities: Schema.Array(EntitySchema), // サブテーブルでは必ず存在（空配列の場合もある）
+    defaultValue: Schema.Array(
+      Schema.Struct({
+        type: Schema.Literal('GROUP'),
+        code: UserFieldCodeSchema,
+      })
+    ), // サブテーブルでは必ず存在（空配列の場合もある）
+  })
+);
+
+// サブテーブル用FILE
+export const SubtableFileFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('FILE'),
+    thumbnailSize: NumericStringSchema,  // サブテーブルでは必ず存在（空文字列の場合もある）
+  })
+);
+
 // サブテーブル内で使用可能なフィールドのUnion
 export const SubtableFieldSchema = Schema.Union(
   SubtableSingleLineTextFieldPropertiesSchema,
@@ -597,7 +655,11 @@ export const SubtableFieldSchema = Schema.Union(
   SubtableDateFieldPropertiesSchema,
   SubtableTimeFieldPropertiesSchema,
   SubtableDateTimeFieldPropertiesSchema,
-  SubtableLinkFieldPropertiesSchema
+  SubtableLinkFieldPropertiesSchema,
+  SubtableUserSelectFieldPropertiesSchema,
+  SubtableOrganizationSelectFieldPropertiesSchema,
+  SubtableGroupSelectFieldPropertiesSchema,
+  SubtableFileFieldPropertiesSchema
 );
 
 // レイアウトフィールド
