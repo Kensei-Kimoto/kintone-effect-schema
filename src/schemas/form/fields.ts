@@ -1,14 +1,13 @@
 import { Schema } from 'effect';
 
 // 数値文字列スキーマ（kintone APIは数値を文字列として返す）
+// kintone APIは数値プロパティを文字列として返す：
+// - 設定なし: ""（空文字列）または プロパティなし（undefined）
+// - 設定あり: "100"（数値文字列）
 const NumericStringSchema = Schema.String;
 
-// オプショナルな数値文字列スキーマ（空文字列も許可）
-// kintone APIは「設定なし」を以下のパターンで返す：
-// - プロパティなし（undefined）
-// - 空文字列 ""（特にサブテーブル内フィールド）
-// - 数値文字列 "100"
-const OptionalNumericStringSchema = Schema.optional(Schema.String);
+// オプショナルな数値文字列スキーマ
+const OptionalNumericStringSchema = Schema.optional(NumericStringSchema);
 
 
 // フィールドコードのバリデーション
