@@ -6,6 +6,7 @@ import {
   CheckBoxFieldPropertiesSchema,
   RadioButtonFieldPropertiesSchema,
   DateFieldPropertiesSchema,
+  DateTimeFieldPropertiesSchema,
   UserSelectFieldPropertiesSchema,
   SubtableFieldPropertiesSchema,
   GetFormFieldsResponseSchema,
@@ -148,7 +149,7 @@ describe('Kintone Form Field Properties Schemas', () => {
         code: 'vertical_radio',
         label: '縦並び選択',
         options: {
-          opt1: { label: 'Option 1', index: 0 },
+          opt1: { label: 'Option 1', index: '0' },
         },
         align: 'VERTICAL',
       }
@@ -647,6 +648,90 @@ describe('Kintone Form Field Properties Schemas', () => {
       }
       
       const result = Schema.decodeUnknownSync(KintoneFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+  })
+
+  describe('Lookup functionality', () => {
+    it('should parse SINGLE_LINE_TEXT field with lookup configuration', () => {
+      const input = {
+        type: 'SINGLE_LINE_TEXT',
+        code: 'company_name',
+        label: '会社名',
+        lookup: {
+          relatedApp: {
+            app: '123',
+            code: 'company_master'
+          },
+          relatedKeyField: 'name',
+          fieldMappings: [
+            {
+              field: 'address',
+              relatedField: 'company_address'
+            }
+          ],
+          lookupPickerFields: ['name', 'address'],
+          filterCond: 'active = "true"',
+          sort: 'name asc'
+        }
+      }
+      
+      const result = Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse field with lookup settings having empty strings', () => {
+      const input = {
+        type: 'NUMBER',
+        code: 'amount',
+        label: '金額',
+        lookup: {
+          relatedApp: {
+            app: '456'
+          },
+          relatedKeyField: 'amount',
+          fieldMappings: '',
+          lookupPickerFields: '',
+          filterCond: '',
+          sort: ''
+        }
+      }
+      
+      const result = Schema.decodeUnknownSync(NumberFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse DATE field with lookup configuration', () => {
+      const input = {
+        type: 'DATE',
+        code: 'start_date',
+        label: '開始日',
+        lookup: {
+          relatedApp: {
+            app: '789'
+          },
+          relatedKeyField: 'project_start'
+        }
+      }
+      
+      const result = Schema.decodeUnknownSync(DateFieldPropertiesSchema)(input)
+      expect(result).toEqual(input)
+    })
+
+    it('should parse DATETIME field with lookup configuration', () => {
+      const input = {
+        type: 'DATETIME',
+        code: 'created_at',
+        label: '作成日時',
+        lookup: {
+          relatedApp: {
+            app: '999'
+          },
+          relatedKeyField: 'timestamp'
+        }
+      }
+      
+      const result = Schema.decodeUnknownSync(DateTimeFieldPropertiesSchema)(input)
       expect(result).toEqual(input)
     })
   })

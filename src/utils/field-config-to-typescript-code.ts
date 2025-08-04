@@ -37,7 +37,6 @@ const FIELD_TYPE_TO_TS_TYPE: Record<string, string> = {
   ORGANIZATION_SELECT: 'OrganizationSelectFieldProperties',
   GROUP_SELECT: 'GroupSelectFieldProperties',
   FILE: 'FileFieldProperties',
-  LOOKUP: 'LookupFieldProperties',
   REFERENCE_TABLE: 'ReferenceTableFieldProperties',
   RECORD_NUMBER: 'RecordNumberFieldProperties',
   CREATOR: 'CreatorFieldProperties',

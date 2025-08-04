@@ -1,5 +1,12 @@
 import { Schema } from 'effect';
 
+// 数値文字列スキーマ（kintone APIは数値を文字列として返す）
+const NumericStringSchema = Schema.String;
+
+// オプショナルな数値文字列スキーマ
+const OptionalNumericStringSchema = Schema.optional(Schema.String);
+
+
 // フィールドコードのバリデーション
 // 使用可能な文字:
 // - ひらがな
@@ -59,7 +66,7 @@ const BaseFieldPropertiesSchema = Schema.Struct({
 // オプション定義
 const OptionSchema = Schema.Struct({
   label: Schema.String,
-  index: Schema.Union(Schema.Number, Schema.String),
+  index: NumericStringSchema,
 });
 
 // エンティティ定義（ユーザー・組織・グループ選択用）
@@ -75,13 +82,23 @@ const LookupSettingSchema = Schema.Struct({
     code: Schema.optional(Schema.String),
   }),
   relatedKeyField: Schema.String,
-  fieldMappings: Schema.Array(
-    Schema.Struct({
-      field: Schema.String,
-      relatedField: Schema.String,
-    })
+  fieldMappings: Schema.optional(
+    Schema.Union(
+      Schema.Array(
+        Schema.Struct({
+          field: Schema.String,
+          relatedField: Schema.String,
+        })
+      ),
+      Schema.Literal("")
+    )
   ),
-  lookupPickerFields: Schema.Array(Schema.String),
+  lookupPickerFields: Schema.optional(
+    Schema.Union(
+      Schema.Array(Schema.String),
+      Schema.Literal("")
+    )
+  ),
   filterCond: Schema.optional(Schema.String),
   sort: Schema.optional(Schema.String),
 });
@@ -99,7 +116,7 @@ const ReferenceTableSettingSchema = Schema.Struct({
   filterCond: Schema.optional(Schema.String),
   displayFields: Schema.Array(Schema.String),
   sort: Schema.optional(Schema.String),
-  size: Schema.optional(Schema.Number),
+  size: OptionalNumericStringSchema,
 });
 
 // 各フィールドタイプの設定スキーマ
@@ -123,10 +140,11 @@ export const SingleLineTextFieldPropertiesSchema = Schema.extend(
     type: Schema.Literal('SINGLE_LINE_TEXT'),
     defaultValue: Schema.optional(Schema.String),
     unique: Schema.optional(Schema.Boolean),
-    minLength: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
-    maxLength: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+    minLength: OptionalNumericStringSchema,
+    maxLength: OptionalNumericStringSchema,
     expression: Schema.optional(Schema.String),
     hideExpression: Schema.optional(Schema.Boolean),
+    lookup: Schema.optional(LookupSettingSchema),
   })
 );
 
@@ -152,12 +170,13 @@ export const NumberFieldPropertiesSchema = Schema.extend(
     type: Schema.Literal('NUMBER'),
     defaultValue: Schema.optional(Schema.String),
     unique: Schema.optional(Schema.Boolean),
-    minValue: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
-    maxValue: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+    minValue: OptionalNumericStringSchema,
+    maxValue: OptionalNumericStringSchema,
     digit: Schema.optional(Schema.Boolean),
-    displayScale: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+    displayScale: OptionalNumericStringSchema,
     unit: Schema.optional(Schema.String),
     unitPosition: Schema.optional(Schema.Union(Schema.Literal('BEFORE'), Schema.Literal('AFTER'))),
+    lookup: Schema.optional(LookupSettingSchema),
   })
 );
 
@@ -177,7 +196,7 @@ export const CalcFieldPropertiesSchema = Schema.extend(
         Schema.Literal('DAY_HOUR_MINUTE')
       )
     ),
-    displayScale: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+    displayScale: OptionalNumericStringSchema,
     hideExpression: Schema.optional(Schema.Boolean),
     unit: Schema.optional(Schema.String),
     unitPosition: Schema.optional(Schema.Union(Schema.Literal('BEFORE'), Schema.Literal('AFTER'))),
@@ -229,6 +248,7 @@ export const DateFieldPropertiesSchema = Schema.extend(
     defaultValue: Schema.optional(Schema.String),
     unique: Schema.optional(Schema.Boolean),
     defaultNowValue: Schema.optional(Schema.Boolean),
+    lookup: Schema.optional(LookupSettingSchema),
   })
 );
 
@@ -248,6 +268,7 @@ export const DateTimeFieldPropertiesSchema = Schema.extend(
     defaultValue: Schema.optional(Schema.String),
     unique: Schema.optional(Schema.Boolean),
     defaultNowValue: Schema.optional(Schema.Boolean),
+    lookup: Schema.optional(LookupSettingSchema),
   })
 );
 
@@ -258,8 +279,8 @@ export const LinkFieldPropertiesSchema = Schema.extend(
     protocol: Schema.Union(Schema.Literal('WEB'), Schema.Literal('CALL'), Schema.Literal('MAIL')),
     defaultValue: Schema.optional(Schema.String),
     unique: Schema.optional(Schema.Boolean),
-    minLength: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
-    maxLength: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+    minLength: OptionalNumericStringSchema,
+    maxLength: OptionalNumericStringSchema,
   })
 );
 
@@ -319,17 +340,10 @@ export const FileFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('FILE'),
-    thumbnailSize: Schema.optional(Schema.Union(Schema.Number, Schema.String)),
+    thumbnailSize: OptionalNumericStringSchema,
   })
 );
 
-export const LookupFieldPropertiesSchema = Schema.extend(
-  BaseFieldPropertiesSchema,
-  Schema.Struct({
-    type: Schema.Literal('LOOKUP'),
-    lookup: Schema.optional(LookupSettingSchema),
-  })
-);
 
 export const ReferenceTableFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
@@ -509,7 +523,6 @@ export const KintoneFieldPropertiesSchema = Schema.Union(
   OrganizationSelectFieldPropertiesSchema,
   GroupSelectFieldPropertiesSchema,
   FileFieldPropertiesSchema,
-  LookupFieldPropertiesSchema,
   ReferenceTableFieldPropertiesSchema,
   RecordNumberFieldPropertiesSchema,
   CreatorFieldPropertiesSchema,
@@ -567,7 +580,6 @@ export type GroupSelectFieldProperties = Schema.Schema.Type<
   typeof GroupSelectFieldPropertiesSchema
 >;
 export type FileFieldProperties = Schema.Schema.Type<typeof FileFieldPropertiesSchema>;
-export type LookupFieldProperties = Schema.Schema.Type<typeof LookupFieldPropertiesSchema>;
 export type ReferenceTableFieldProperties = Schema.Schema.Type<
   typeof ReferenceTableFieldPropertiesSchema
 >;

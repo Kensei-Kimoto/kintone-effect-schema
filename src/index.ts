@@ -104,6 +104,7 @@ export {
   decodeKintoneRecord,
 } from './decoders.js'
 
+
 // バリデーターのエクスポート
 export {
   KintoneValidationError,
