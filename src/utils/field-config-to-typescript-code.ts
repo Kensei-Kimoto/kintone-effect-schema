@@ -4,6 +4,20 @@
 
 import type { KintoneFieldProperties } from '../schemas/form/fields.js';
 
+// Define subtable structure locally since it's not in the main union
+type SubtableFieldProperties = {
+  type: 'SUBTABLE';
+  code: string;
+  fields: Record<string, {
+    type: string;
+    code: string;
+    label: string;
+    [key: string]: unknown;
+  }>;
+};
+
+type AllFieldProperties = KintoneFieldProperties | SubtableFieldProperties;
+
 // Field type to TypeScript type name mapping
 const FIELD_TYPE_TO_TS_TYPE: Record<string, string> = {
   SINGLE_LINE_TEXT: 'SingleLineTextFieldProperties',
@@ -40,6 +54,15 @@ const FIELD_TYPE_TO_TS_TYPE: Record<string, string> = {
   SPACER: 'SpacerFieldProperties',
   LABEL: 'LabelFieldProperties',
 };
+
+/**
+ * Check if a field is a subtable
+ * @param fieldConfig Field configuration object
+ * @returns true if the field is a subtable
+ */
+function isSubtableField(fieldConfig: AllFieldProperties): fieldConfig is SubtableFieldProperties {
+  return fieldConfig.type === 'SUBTABLE' && 'fields' in fieldConfig;
+}
 
 /**
  * Convert field code to a valid TypeScript variable name
@@ -169,11 +192,13 @@ function isReservedWord(word: string): boolean {
  * Convert a single field configuration to TypeScript code
  * @param fieldConfig Field configuration object
  * @param fieldCode Field code (used as variable name base)
+ * @param isSubtableChild Whether this field is inside a subtable
  * @returns TypeScript code string
  */
 export function fieldConfigToTypeScriptCode(
-  fieldConfig: KintoneFieldProperties,
-  fieldCode?: string
+  fieldConfig: AllFieldProperties,
+  fieldCode?: string,
+  isSubtableChild: boolean = false
 ): string {
   const fieldType = fieldConfig.type;
   const tsType = FIELD_TYPE_TO_TS_TYPE[fieldType as string];
@@ -187,10 +212,42 @@ export function fieldConfigToTypeScriptCode(
   const varName = toVariableName(code);
   
   // Generate the field configuration code
-  const configCode = valueToCode(fieldConfig, 0);
+  let configCode = valueToCode(fieldConfig, 0);
+  
+  // Handle subtable fields specially
+  if (isSubtableField(fieldConfig)) {
+    const subtableConfig = fieldConfig; // Now properly typed as SubtableFieldProperties
+    const fieldsEntries = Object.entries(subtableConfig.fields || {});
+    
+    if (fieldsEntries.length > 0) {
+      // Create a new config object with fields handled specially
+      const configToSerialize = {
+        ...subtableConfig,
+        fields: '<<FIELDS_PLACEHOLDER>>'
+      };
+      
+      // Generate base config
+      configCode = valueToCode(configToSerialize, 0);
+      
+      // Generate subtable fields object with proper indentation
+      const subtableFieldsCode = fieldsEntries.map(([fieldCode, fieldDef]) => {
+        const needsQuotes = !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(fieldCode) || isReservedWord(fieldCode);
+        const key = needsQuotes ? JSON.stringify(fieldCode) : fieldCode;
+        const value = valueToCode(fieldDef, 2);
+        return `    ${key}: ${value}`;
+      }).join(',\n');
+      
+      // Replace the placeholder with actual fields
+      configCode = configCode.replace(
+        '"<<FIELDS_PLACEHOLDER>>"',
+        `{\n${subtableFieldsCode}\n  }`
+      );
+    }
+  }
   
   // No need for comments anymore since we keep the original field code
-  return `export const ${varName}: ${tsType} = ${configCode};`;
+  const exportKeyword = isSubtableChild ? 'const' : 'export const';
+  return `${exportKeyword} ${varName}: ${tsType} = ${configCode};`;
 }
 
 /**
@@ -199,7 +256,7 @@ export function fieldConfigToTypeScriptCode(
  * @returns TypeScript code string with imports and all field definitions
  */
 export function fieldsConfigToTypeScriptCode(
-  fieldsConfig: Record<string, KintoneFieldProperties>
+  fieldsConfig: Record<string, AllFieldProperties>
 ): string {
   const fieldEntries = Object.entries(fieldsConfig);
   
@@ -219,6 +276,22 @@ export function fieldsConfigToTypeScriptCode(
     
     if (tsType) {
       typeNames.add(tsType);
+      
+      // Handle subtable fields
+      if (isSubtableField(fieldConfig)) {
+        const subtableConfig = fieldConfig;
+        const subtableFields = subtableConfig.fields || {};
+        
+        // Add type names for subtable child fields
+        for (const subFieldConfig of Object.values(subtableFields)) {
+          const subFieldType = subFieldConfig.type;
+          const subTsType = FIELD_TYPE_TO_TS_TYPE[subFieldType];
+          if (subTsType) {
+            typeNames.add(subTsType);
+          }
+        }
+      }
+      
       const varName = toVariableName(fieldCode);
       const fieldDef = fieldConfigToTypeScriptCode(fieldConfig, fieldCode);
       fieldDefinitions.push(fieldDef);

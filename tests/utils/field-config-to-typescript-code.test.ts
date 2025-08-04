@@ -185,6 +185,66 @@ describe('field-config-to-typescript-code', () => {
       expect(result).toContain('quantity: {')
     })
 
+    it('should handle complex subtable with multiple field types', () => {
+      const fieldsConfig = {
+        orderItems: {
+          type: 'SUBTABLE',
+          code: 'orderItems',
+          fields: {
+            '商品コード': {
+              type: 'SINGLE_LINE_TEXT',
+              code: '商品コード',
+              label: '商品コード',
+              required: true
+            },
+            '単価': {
+              type: 'NUMBER',
+              code: '単価',
+              label: '単価',
+              defaultValue: '0',
+              unit: '円',
+              unitPosition: 'AFTER'
+            },
+            '数量': {
+              type: 'NUMBER',
+              code: '数量',
+              label: '数量',
+              defaultValue: '1'
+            },
+            '割引率': {
+              type: 'DROP_DOWN',
+              code: '割引率',
+              label: '割引率',
+              options: {
+                '0%': { label: '0%' },
+                '10%': { label: '10%' },
+                '20%': { label: '20%' }
+              }
+            }
+          }
+        } as SubtableFieldProperties
+      }
+      
+      const result = fieldsConfigToTypeScriptCode(fieldsConfig)
+      
+      // Check imports for all field types
+      expect(result).toContain('SubtableFieldProperties')
+      expect(result).toContain('SingleLineTextFieldProperties')
+      expect(result).toContain('NumberFieldProperties')
+      expect(result).toContain('DropDownFieldProperties')
+      
+      // Check Japanese field codes are preserved
+      expect(result).toContain('"商品コード": {')
+      expect(result).toContain('"単価": {')
+      expect(result).toContain('"数量": {')
+      expect(result).toContain('"割引率": {')
+      
+      // Check nested field properties
+      expect(result).toContain('unit: "円"')
+      expect(result).toContain('unitPosition: "AFTER"')
+      expect(result).toContain('options: {')
+    })
+
     it('should handle empty fields config', () => {
       const fieldsConfig = {}
       
