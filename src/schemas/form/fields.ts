@@ -1,13 +1,10 @@
 import { Schema } from 'effect';
 
-// 数値文字列スキーマ（kintone APIは数値を文字列として返す）
 // kintone APIは数値プロパティを文字列として返す：
-// - 設定なし: ""（空文字列）または プロパティなし（undefined）
+// - 設定なし: ""（空文字列）
 // - 設定あり: "100"（数値文字列）
+// ユーザー作成フィールドでは必ず存在し、システムフィールドでは省略される
 const NumericStringSchema = Schema.String;
-
-// オプショナルな数値文字列スキーマ
-const OptionalNumericStringSchema = Schema.optional(NumericStringSchema);
 
 
 // フィールドコードのバリデーション
@@ -119,7 +116,7 @@ const ReferenceTableSettingSchema = Schema.Struct({
   filterCond: Schema.optional(Schema.String),
   displayFields: Schema.Array(Schema.String),
   sort: Schema.optional(Schema.String),
-  size: OptionalNumericStringSchema,
+  size: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
 });
 
 // 各フィールドタイプの設定スキーマ
@@ -141,10 +138,10 @@ export const SingleLineTextFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('SINGLE_LINE_TEXT'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     unique: Schema.optional(Schema.Boolean),
-    minLength: OptionalNumericStringSchema,
-    maxLength: OptionalNumericStringSchema,
+    minLength: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
+    maxLength: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
     expression: Schema.optional(Schema.String),
     hideExpression: Schema.optional(Schema.Boolean),
     lookup: Schema.optional(LookupSettingSchema),
@@ -155,7 +152,7 @@ export const MultiLineTextFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('MULTI_LINE_TEXT'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
   })
 );
 
@@ -163,7 +160,7 @@ export const RichTextFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('RICH_TEXT'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
   })
 );
 
@@ -171,13 +168,13 @@ export const NumberFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('NUMBER'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     unique: Schema.optional(Schema.Boolean),
-    minValue: OptionalNumericStringSchema,
-    maxValue: OptionalNumericStringSchema,
+    minValue: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
+    maxValue: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
     digit: Schema.optional(Schema.Boolean),
-    displayScale: OptionalNumericStringSchema,
-    unit: Schema.optional(Schema.String),
+    displayScale: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
+    unit: Schema.String,  // kintone APIで空文字列として返される（必須）
     unitPosition: Schema.optional(Schema.Union(Schema.Literal('BEFORE'), Schema.Literal('AFTER'))),
     lookup: Schema.optional(LookupSettingSchema),
   })
@@ -187,7 +184,7 @@ export const CalcFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('CALC'),
-    expression: Schema.String,
+    expression: Schema.optional(Schema.String),
     format: Schema.optional(
       Schema.Union(
         Schema.Literal('NUMBER'),
@@ -199,9 +196,9 @@ export const CalcFieldPropertiesSchema = Schema.extend(
         Schema.Literal('DAY_HOUR_MINUTE')
       )
     ),
-    displayScale: OptionalNumericStringSchema,
+    displayScale: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
     hideExpression: Schema.optional(Schema.Boolean),
-    unit: Schema.optional(Schema.String),
+    unit: Schema.String,  // kintone APIで空文字列として返される（必須）
     unitPosition: Schema.optional(Schema.Union(Schema.Literal('BEFORE'), Schema.Literal('AFTER'))),
   })
 );
@@ -211,7 +208,7 @@ export const RadioButtonFieldPropertiesSchema = Schema.extend(
   Schema.Struct({
     type: Schema.Literal('RADIO_BUTTON'),
     options: Schema.Record({ key: Schema.String, value: OptionSchema }),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     align: Schema.optional(Schema.Union(Schema.Literal('HORIZONTAL'), Schema.Literal('VERTICAL'))),
   })
 );
@@ -221,7 +218,7 @@ export const CheckBoxFieldPropertiesSchema = Schema.extend(
   Schema.Struct({
     type: Schema.Literal('CHECK_BOX'),
     options: Schema.Record({ key: Schema.String, value: OptionSchema }),
-    defaultValue: Schema.optional(Schema.Array(Schema.String)),
+    defaultValue: Schema.Array(Schema.String),  // kintone APIで空配列として返される（必須）
     align: Schema.optional(Schema.Union(Schema.Literal('HORIZONTAL'), Schema.Literal('VERTICAL'))),
   })
 );
@@ -231,7 +228,7 @@ export const MultiSelectFieldPropertiesSchema = Schema.extend(
   Schema.Struct({
     type: Schema.Literal('MULTI_SELECT'),
     options: Schema.Record({ key: Schema.String, value: OptionSchema }),
-    defaultValue: Schema.optional(Schema.Array(Schema.String)),
+    defaultValue: Schema.Array(Schema.String),  // kintone APIで空配列として返される（必須）
   })
 );
 
@@ -240,7 +237,7 @@ export const DropDownFieldPropertiesSchema = Schema.extend(
   Schema.Struct({
     type: Schema.Literal('DROP_DOWN'),
     options: Schema.Record({ key: Schema.String, value: OptionSchema }),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
   })
 );
 
@@ -248,7 +245,7 @@ export const DateFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('DATE'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     unique: Schema.optional(Schema.Boolean),
     defaultNowValue: Schema.optional(Schema.Boolean),
     lookup: Schema.optional(LookupSettingSchema),
@@ -259,7 +256,7 @@ export const TimeFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('TIME'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     defaultNowValue: Schema.optional(Schema.Boolean),
   })
 );
@@ -268,7 +265,7 @@ export const DateTimeFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('DATETIME'),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     unique: Schema.optional(Schema.Boolean),
     defaultNowValue: Schema.optional(Schema.Boolean),
     lookup: Schema.optional(LookupSettingSchema),
@@ -280,10 +277,10 @@ export const LinkFieldPropertiesSchema = Schema.extend(
   Schema.Struct({
     type: Schema.Literal('LINK'),
     protocol: Schema.Union(Schema.Literal('WEB'), Schema.Literal('CALL'), Schema.Literal('MAIL')),
-    defaultValue: Schema.optional(Schema.String),
+    defaultValue: Schema.String,  // kintone APIで空文字列として返される（必須）
     unique: Schema.optional(Schema.Boolean),
-    minLength: OptionalNumericStringSchema,
-    maxLength: OptionalNumericStringSchema,
+    minLength: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
+    maxLength: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
   })
 );
 
@@ -343,7 +340,7 @@ export const FileFieldPropertiesSchema = Schema.extend(
   BaseFieldPropertiesSchema,
   Schema.Struct({
     type: Schema.Literal('FILE'),
-    thumbnailSize: OptionalNumericStringSchema,
+    thumbnailSize: NumericStringSchema,  // kintone APIで空文字列として返される（必須）
   })
 );
 
@@ -416,35 +413,191 @@ export const CategoryFieldPropertiesSchema = Schema.Struct({
   enabled: Schema.optional(Schema.Boolean),
 });
 
-// サブテーブル内で使用可能なフィールドタイプ
-// サブテーブル内では以下のフィールドタイプのみ使用可能:
-// - SINGLE_LINE_TEXT（文字列1行）
-// - NUMBER（数値）
-// - CALC（計算）
-// - MULTI_LINE_TEXT（文字列複数行）
-// - RICH_TEXT（リッチテキスト）
-// - CHECK_BOX（チェックボックス）
-// - RADIO_BUTTON（ラジオボタン）
-// - DROP_DOWN（ドロップダウン）
-// - MULTI_SELECT（複数選択）
-// - DATE（日付）
-// - TIME（時刻）
-// - DATETIME（日時）
-// - LINK（リンク）
+// サブテーブル専用フィールドスキーマ
+// サブテーブル内では空値を空文字列として返すため、通常フィールドとは異なるスキーマが必要
+
+// サブテーブル用の基本フィールドプロパティ
+const BaseSubtableFieldPropertiesSchema = Schema.Struct({
+  type: Schema.String,
+  code: UserFieldCodeSchema,
+  label: Schema.String,
+  noLabel: Schema.Boolean,  // 必ず存在
+  required: Schema.Boolean, // 必ず存在
+});
+
+// サブテーブル用SINGLE_LINE_TEXT
+export const SubtableSingleLineTextFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('SINGLE_LINE_TEXT'),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+    unique: Schema.Boolean,       // 必ず存在
+    minLength: NumericStringSchema,  // 空文字列または数値文字列（必ず存在）
+    maxLength: NumericStringSchema,  // 空文字列または数値文字列（必ず存在）
+    expression: Schema.String,       // 空文字列または式（必ず存在）
+    hideExpression: Schema.Boolean,  // 必ず存在
+  })
+);
+
+// サブテーブル用MULTI_LINE_TEXT
+export const SubtableMultiLineTextFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('MULTI_LINE_TEXT'),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+  })
+);
+
+// サブテーブル用RICH_TEXT
+export const SubtableRichTextFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('RICH_TEXT'),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+  })
+);
+
+// サブテーブル用NUMBER
+export const SubtableNumberFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('NUMBER'),
+    defaultValue: Schema.String,     // 空文字列または値（必ず存在）
+    unique: Schema.Boolean,          // 必ず存在
+    minValue: NumericStringSchema,   // 空文字列または数値文字列（必ず存在）
+    maxValue: NumericStringSchema,   // 空文字列または数値文字列（必ず存在）
+    digit: Schema.Boolean,           // 必ず存在
+    displayScale: NumericStringSchema, // 空文字列または数値文字列（必ず存在）
+    unit: Schema.String,             // 空文字列または値（必ず存在）
+    unitPosition: Schema.Union(Schema.Literal('BEFORE'), Schema.Literal('AFTER'), Schema.Literal('')), // 必ず存在
+  })
+);
+
+// サブテーブル用CALC
+export const SubtableCalcFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('CALC'),
+    expression: Schema.String,  // 空文字列または式（必ず存在）
+    format: Schema.Union(
+      Schema.Literal('NUMBER'),
+      Schema.Literal('NUMBER_DIGIT'),
+      Schema.Literal('DATETIME'),
+      Schema.Literal('DATE'),
+      Schema.Literal('TIME'),
+      Schema.Literal('HOUR_MINUTE'),
+      Schema.Literal('DAY_HOUR_MINUTE'),
+      Schema.Literal('')
+    ), // 必ず存在
+    displayScale: NumericStringSchema, // 空文字列または数値文字列（必ず存在）
+    hideExpression: Schema.Boolean,    // 必ず存在
+    unit: Schema.String,               // 空文字列または値（必ず存在）
+    unitPosition: Schema.Union(Schema.Literal('BEFORE'), Schema.Literal('AFTER'), Schema.Literal('')), // 必ず存在
+  })
+);
+
+// サブテーブル用RADIO_BUTTON
+export const SubtableRadioButtonFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('RADIO_BUTTON'),
+    options: Schema.Record({ key: Schema.String, value: OptionSchema }),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+    align: Schema.Union(Schema.Literal('HORIZONTAL'), Schema.Literal('VERTICAL'), Schema.Literal('')), // 必ず存在
+  })
+);
+
+// サブテーブル用CHECK_BOX
+export const SubtableCheckBoxFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('CHECK_BOX'),
+    options: Schema.Record({ key: Schema.String, value: OptionSchema }),
+    defaultValue: Schema.Array(Schema.String), // 配列（必ず存在、空配列の場合もある）
+    align: Schema.Union(Schema.Literal('HORIZONTAL'), Schema.Literal('VERTICAL'), Schema.Literal('')), // 必ず存在
+  })
+);
+
+// サブテーブル用MULTI_SELECT
+export const SubtableMultiSelectFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('MULTI_SELECT'),
+    options: Schema.Record({ key: Schema.String, value: OptionSchema }),
+    defaultValue: Schema.Array(Schema.String), // 配列（必ず存在、空配列の場合もある）
+  })
+);
+
+// サブテーブル用DROP_DOWN
+export const SubtableDropDownFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('DROP_DOWN'),
+    options: Schema.Record({ key: Schema.String, value: OptionSchema }),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+  })
+);
+
+// サブテーブル用DATE
+export const SubtableDateFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('DATE'),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+    unique: Schema.Boolean,       // 必ず存在
+    defaultNowValue: Schema.Boolean, // 必ず存在
+  })
+);
+
+// サブテーブル用TIME
+export const SubtableTimeFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('TIME'),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+    defaultNowValue: Schema.Boolean, // 必ず存在
+  })
+);
+
+// サブテーブル用DATETIME
+export const SubtableDateTimeFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('DATETIME'),
+    defaultValue: Schema.String,  // 空文字列または値（必ず存在）
+    unique: Schema.Boolean,       // 必ず存在
+    defaultNowValue: Schema.Boolean, // 必ず存在
+  })
+);
+
+// サブテーブル用LINK
+export const SubtableLinkFieldPropertiesSchema = Schema.extend(
+  BaseSubtableFieldPropertiesSchema,
+  Schema.Struct({
+    type: Schema.Literal('LINK'),
+    protocol: Schema.Union(Schema.Literal('WEB'), Schema.Literal('CALL'), Schema.Literal('MAIL')),
+    defaultValue: Schema.String,     // 空文字列または値
+    unique: Schema.Boolean,          // 必ず存在
+    minLength: NumericStringSchema,  // 空文字列または数値文字列（必ず存在）
+    maxLength: NumericStringSchema,  // 空文字列または数値文字列（必ず存在）
+  })
+);
+
+// サブテーブル内で使用可能なフィールドのUnion
 export const SubtableFieldSchema = Schema.Union(
-  SingleLineTextFieldPropertiesSchema,
-  NumberFieldPropertiesSchema,
-  CalcFieldPropertiesSchema,
-  MultiLineTextFieldPropertiesSchema,
-  RichTextFieldPropertiesSchema,
-  CheckBoxFieldPropertiesSchema,
-  RadioButtonFieldPropertiesSchema,
-  DropDownFieldPropertiesSchema,
-  MultiSelectFieldPropertiesSchema,
-  DateFieldPropertiesSchema,
-  TimeFieldPropertiesSchema,
-  DateTimeFieldPropertiesSchema,
-  LinkFieldPropertiesSchema
+  SubtableSingleLineTextFieldPropertiesSchema,
+  SubtableMultiLineTextFieldPropertiesSchema,
+  SubtableRichTextFieldPropertiesSchema,
+  SubtableNumberFieldPropertiesSchema,
+  SubtableCalcFieldPropertiesSchema,
+  SubtableRadioButtonFieldPropertiesSchema,
+  SubtableCheckBoxFieldPropertiesSchema,
+  SubtableMultiSelectFieldPropertiesSchema,
+  SubtableDropDownFieldPropertiesSchema,
+  SubtableDateFieldPropertiesSchema,
+  SubtableTimeFieldPropertiesSchema,
+  SubtableDateTimeFieldPropertiesSchema,
+  SubtableLinkFieldPropertiesSchema
 );
 
 // レイアウトフィールド
@@ -535,6 +688,7 @@ export const KintoneFieldPropertiesSchema = Schema.Union(
   StatusFieldPropertiesSchema,
   StatusAssigneeFieldPropertiesSchema,
   CategoryFieldPropertiesSchema,
+  SubtableFieldPropertiesSchema,
   GroupFieldPropertiesSchema,
   RecordIdFieldPropertiesSchema,
   RevisionFieldPropertiesSchema,
@@ -548,7 +702,7 @@ export const KintoneFieldPropertiesSchema = Schema.Union(
 export const GetFormFieldsResponseSchema = Schema.Struct({
   properties: Schema.Record({
     key: Schema.String,
-    value: Schema.Union(KintoneFieldPropertiesSchema, SubtableFieldPropertiesSchema),
+    value: KintoneFieldPropertiesSchema,
   }),
   revision: Schema.optional(Schema.String),
 });

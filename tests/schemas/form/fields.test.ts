@@ -46,11 +46,14 @@ describe('Kintone Form Field Properties Schemas', () => {
       expect(result).toEqual(input)
     })
 
-    it('should parse with optional properties omitted', () => {
+    it('should parse with required properties provided', () => {
       const input = {
         type: 'SINGLE_LINE_TEXT',
         code: 'text_field_2',
         label: 'シンプルテキスト',
+        defaultValue: '',  // kintone APIで必ず返される
+        minLength: '',     // kintone APIで必ず返される
+        maxLength: '',     // kintone APIで必ず返される
       }
       
       const result = Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)
@@ -105,7 +108,11 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'NUMBER',
         code: 'price_usd',
         label: 'Price',
-        unit: '$',
+        defaultValue: '',    // kintone APIで必ず返される
+        minValue: '',        // kintone APIで必ず返される
+        maxValue: '',        // kintone APIで必ず返される
+        displayScale: '',    // kintone APIで必ず返される
+        unit: '$',           // kintone APIで必ず返される
         unitPosition: 'BEFORE',
       }
       
@@ -151,6 +158,7 @@ describe('Kintone Form Field Properties Schemas', () => {
         options: {
           opt1: { label: 'Option 1', index: '0' },
         },
+        defaultValue: '',  // kintone APIで必ず返される
         align: 'VERTICAL',
       }
       
@@ -200,6 +208,7 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'DATE',
         code: 'today_date',
         label: '今日の日付',
+        defaultValue: '',    // kintone APIで必ず返される
         defaultNowValue: true,
       }
       
@@ -240,13 +249,29 @@ describe('Kintone Form Field Properties Schemas', () => {
             type: 'SINGLE_LINE_TEXT',
             code: 'text_in_table',
             label: 'テーブル内テキスト',
+            noLabel: false,
             required: true,
+            defaultValue: '',
+            unique: false,
+            minLength: '0',
+            maxLength: '255',
+            expression: '',
+            hideExpression: false,
           },
           number_in_table: {
             type: 'NUMBER',
             code: 'number_in_table',
             label: 'テーブル内数値',
+            noLabel: false,
+            required: false,
             defaultValue: '0',
+            unique: false,
+            minValue: '',
+            maxValue: '',
+            digit: false,
+            displayScale: '',
+            unit: '',
+            unitPosition: '',
           },
         },
       }
@@ -265,12 +290,19 @@ describe('Kintone Form Field Properties Schemas', () => {
             code: 'text_field',
             label: 'テキスト',
             required: true,
+            defaultValue: '',  // kintone APIで必ず返される
+            minLength: '',     // kintone APIで必ず返される
+            maxLength: '',     // kintone APIで必ず返される
           },
           number_field: {
             type: 'NUMBER',
             code: 'number_field',
             label: '数値',
-            unit: '円',
+            defaultValue: '',  // kintone APIで必ず返される
+            minValue: '',      // kintone APIで必ず返される
+            maxValue: '',      // kintone APIで必ず返される
+            displayScale: '',  // kintone APIで必ず返される
+            unit: '円',        // kintone APIで必ず返される
             unitPosition: 'AFTER',
           },
           table_field: {
@@ -281,6 +313,14 @@ describe('Kintone Form Field Properties Schemas', () => {
                 type: 'SINGLE_LINE_TEXT',
                 code: 'sub_text',
                 label: 'サブテキスト',
+                noLabel: false,
+                required: false,
+                defaultValue: '',
+                unique: false,
+                minLength: '',
+                maxLength: '',
+                expression: '',
+                hideExpression: false,
               },
             },
           },
@@ -299,6 +339,7 @@ describe('Kintone Form Field Properties Schemas', () => {
             type: 'DATE',
             code: 'field1',
             label: '日付フィールド',
+            defaultValue: '',  // kintone APIで必ず返される
           },
         },
       }
@@ -357,6 +398,9 @@ describe('Kintone Form Field Properties Schemas', () => {
             type: 'SINGLE_LINE_TEXT',
             code: 'custom_field',
             label: 'カスタムフィールド',
+            defaultValue: '',  // kintone APIで必ず返される（ユーザー作成フィールド）
+            minLength: '',     // kintone APIで必ず返される（ユーザー作成フィールド）
+            maxLength: '',     // kintone APIで必ず返される（ユーザー作成フィールド）
           },
         },
         revision: '10',
@@ -388,6 +432,9 @@ describe('Kintone Form Field Properties Schemas', () => {
           type: 'SINGLE_LINE_TEXT',
           code,
           label: 'Test',
+          defaultValue: '',  // kintone APIで必ず返される
+          minLength: '',     // kintone APIで必ず返される
+          maxLength: '',     // kintone APIで必ず返される
         }
         expect(() => Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)).not.toThrow()
       })
@@ -405,6 +452,9 @@ describe('Kintone Form Field Properties Schemas', () => {
           type: 'SINGLE_LINE_TEXT',
           code,
           label: 'Test',
+          defaultValue: '',  // kintone APIで必ず返される
+          minLength: '',     // kintone APIで必ず返される
+          maxLength: '',     // kintone APIで必ず返される
         }
         expect(() => Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)).not.toThrow()
       })
@@ -658,6 +708,9 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'SINGLE_LINE_TEXT',
         code: 'company_name',
         label: '会社名',
+        defaultValue: '',    // kintone APIで必ず返される
+        minLength: '',       // kintone APIで必ず返される
+        maxLength: '',       // kintone APIで必ず返される
         lookup: {
           relatedApp: {
             app: '123',
@@ -685,6 +738,11 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'NUMBER',
         code: 'amount',
         label: '金額',
+        defaultValue: '',    // kintone APIで必ず返される
+        minValue: '',        // kintone APIで必ず返される
+        maxValue: '',        // kintone APIで必ず返される
+        displayScale: '',    // kintone APIで必ず返される
+        unit: '',            // kintone APIで必ず返される
         lookup: {
           relatedApp: {
             app: '456'
@@ -706,6 +764,7 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'DATE',
         code: 'start_date',
         label: '開始日',
+        defaultValue: '',    // kintone APIで必ず返される
         lookup: {
           relatedApp: {
             app: '789'
@@ -723,6 +782,7 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'DATETIME',
         code: 'created_at',
         label: '作成日時',
+        defaultValue: '',    // kintone APIで必ず返される
         lookup: {
           relatedApp: {
             app: '999'
@@ -748,25 +808,42 @@ describe('Kintone Form Field Properties Schemas', () => {
                 type: 'SINGLE_LINE_TEXT',
                 code: 'from_location',
                 label: '移転元',
+                noLabel: false,
                 required: true,
+                defaultValue: '',
+                unique: false,
                 minLength: '',     // 空文字列
                 maxLength: '255',  // 数値文字列
+                expression: '',
+                hideExpression: false,
               },
               'to_location': {
                 type: 'SINGLE_LINE_TEXT',
                 code: 'to_location',
                 label: '移転先',
+                noLabel: false,
                 required: true,
+                defaultValue: '',
+                unique: false,
                 minLength: '',    // 空文字列
                 maxLength: '',    // 空文字列
+                expression: '',
+                hideExpression: false,
               },
               'cost': {
                 type: 'NUMBER',
                 code: 'cost',
                 label: '費用',
+                noLabel: false,
+                required: false,
+                defaultValue: '',
+                unique: false,
                 minValue: '0',     // 数値文字列
                 maxValue: '',      // 空文字列
+                digit: false,
                 displayScale: '',  // 空文字列
+                unit: '',
+                unitPosition: '',
               },
             },
           },
@@ -792,20 +869,20 @@ describe('Kintone Form Field Properties Schemas', () => {
       }
     })
 
-    it('should accept fields with both empty strings and undefined values', () => {
+    it('should accept fields with empty strings in required properties', () => {
       const input = {
         type: 'SINGLE_LINE_TEXT',
         code: 'test_field',
         label: 'テストフィールド',
-        minLength: '',  // 空文字列
-        maxLength: '100'  // 数値文字列
-        // defaultValue は undefined (プロパティなし)
+        defaultValue: '',  // kintone APIで必ず返される
+        minLength: '',     // 空文字列
+        maxLength: '100'   // 数値文字列
       }
       
       const result = Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)
       expect(result.minLength).toBe('')
       expect(result.maxLength).toBe('100')
-      expect(result.defaultValue).toBeUndefined()
+      expect(result.defaultValue).toBe('')
     })
 
     it('should accept NUMBER field with mixed empty strings and values', () => {
@@ -813,10 +890,11 @@ describe('Kintone Form Field Properties Schemas', () => {
         type: 'NUMBER',
         code: 'amount',
         label: '金額',
+        defaultValue: '',  // kintone APIで必ず返される
         minValue: '',      // 空文字列
         maxValue: '1000',  // 数値文字列
         displayScale: '',  // 空文字列
-        unit: '円',
+        unit: '円',        // kintone APIで必ず返される
         unitPosition: 'AFTER'
       }
       
