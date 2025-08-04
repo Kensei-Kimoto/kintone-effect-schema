@@ -826,8 +826,71 @@ export type SystemIdFieldProperties = Schema.Schema.Type<typeof SystemIdFieldPro
 export type SystemRevisionFieldProperties = Schema.Schema.Type<typeof SystemRevisionFieldPropertiesSchema>;
 export type SpacerFieldProperties = Schema.Schema.Type<typeof SpacerFieldPropertiesSchema>;
 export type LabelFieldProperties = Schema.Schema.Type<typeof LabelFieldPropertiesSchema>;
+
+// サブテーブル用フィールドの型定義
+export type SubtableSingleLineTextFieldProperties = Schema.Schema.Type<typeof SubtableSingleLineTextFieldPropertiesSchema>;
+export type SubtableMultiLineTextFieldProperties = Schema.Schema.Type<typeof SubtableMultiLineTextFieldPropertiesSchema>;
+export type SubtableRichTextFieldProperties = Schema.Schema.Type<typeof SubtableRichTextFieldPropertiesSchema>;
+export type SubtableNumberFieldProperties = Schema.Schema.Type<typeof SubtableNumberFieldPropertiesSchema>;
+export type SubtableCalcFieldProperties = Schema.Schema.Type<typeof SubtableCalcFieldPropertiesSchema>;
+export type SubtableRadioButtonFieldProperties = Schema.Schema.Type<typeof SubtableRadioButtonFieldPropertiesSchema>;
+export type SubtableCheckBoxFieldProperties = Schema.Schema.Type<typeof SubtableCheckBoxFieldPropertiesSchema>;
+export type SubtableMultiSelectFieldProperties = Schema.Schema.Type<typeof SubtableMultiSelectFieldPropertiesSchema>;
+export type SubtableDropDownFieldProperties = Schema.Schema.Type<typeof SubtableDropDownFieldPropertiesSchema>;
+export type SubtableDateFieldProperties = Schema.Schema.Type<typeof SubtableDateFieldPropertiesSchema>;
+export type SubtableTimeFieldProperties = Schema.Schema.Type<typeof SubtableTimeFieldPropertiesSchema>;
+export type SubtableDateTimeFieldProperties = Schema.Schema.Type<typeof SubtableDateTimeFieldPropertiesSchema>;
+export type SubtableLinkFieldProperties = Schema.Schema.Type<typeof SubtableLinkFieldPropertiesSchema>;
+export type SubtableUserSelectFieldProperties = Schema.Schema.Type<typeof SubtableUserSelectFieldPropertiesSchema>;
+export type SubtableOrganizationSelectFieldProperties = Schema.Schema.Type<typeof SubtableOrganizationSelectFieldPropertiesSchema>;
+export type SubtableGroupSelectFieldProperties = Schema.Schema.Type<typeof SubtableGroupSelectFieldPropertiesSchema>;
+export type SubtableFileFieldProperties = Schema.Schema.Type<typeof SubtableFileFieldPropertiesSchema>;
+
+// サブテーブル内フィールドのユニオン型
+export type SubtableField = Schema.Schema.Type<typeof SubtableFieldSchema>;
+
 export type KintoneFieldProperties = Schema.Schema.Type<typeof KintoneFieldPropertiesSchema>;
 export type GetFormFieldsResponse = Schema.Schema.Type<typeof GetFormFieldsResponseSchema>;
+
+// 全フィールドプロパティのユニオン型（kintone-as-code等での型安全な処理のため）
+export type AnyFieldProperties =
+  | SingleLineTextFieldProperties
+  | MultiLineTextFieldProperties
+  | RichTextFieldProperties
+  | NumberFieldProperties
+  | CalcFieldProperties
+  | RadioButtonFieldProperties
+  | CheckBoxFieldProperties
+  | MultiSelectFieldProperties
+  | DropDownFieldProperties
+  | DateFieldProperties
+  | TimeFieldProperties
+  | DateTimeFieldProperties
+  | LinkFieldProperties
+  | UserSelectFieldProperties
+  | OrganizationSelectFieldProperties
+  | GroupSelectFieldProperties
+  | FileFieldProperties
+  | ReferenceTableFieldProperties
+  | RecordNumberFieldProperties
+  | CreatorFieldProperties
+  | CreatedTimeFieldProperties
+  | ModifierFieldProperties
+  | UpdatedTimeFieldProperties
+  | StatusFieldProperties
+  | StatusAssigneeFieldProperties
+  | CategoryFieldProperties
+  | SubtableFieldProperties
+  | GroupFieldProperties
+  | RecordIdFieldProperties
+  | RevisionFieldProperties
+  | SystemIdFieldProperties
+  | SystemRevisionFieldProperties
+  | SpacerFieldProperties
+  | LabelFieldProperties;
+
+// フィールドタイプの文字列リテラル型
+export type FieldType = AnyFieldProperties['type'];
 
 // フィールドコードスキーマのエクスポート
 export { SystemFieldCodeSchema, UserFieldCodeSchema };

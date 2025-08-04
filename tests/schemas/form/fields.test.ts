@@ -23,6 +23,8 @@ import {
   CreatedTimeFieldPropertiesSchema,
   ModifierFieldPropertiesSchema,
   UpdatedTimeFieldPropertiesSchema,
+  type AnyFieldProperties,
+  type FieldType,
 } from '../../../src/schemas/form/fields.js'
 
 describe('Kintone Form Field Properties Schemas', () => {
@@ -1063,6 +1065,119 @@ describe('Kintone Form Field Properties Schemas', () => {
       expect(result.minValue).toBe('')
       expect(result.maxValue).toBe('1000')
       expect(result.displayScale).toBe('')
+    })
+  })
+
+  describe('Union types for type safety', () => {
+    it('AnyFieldProperties should include all field property types', () => {
+      // TypeScriptの型チェックによる検証
+      const singleLineText: AnyFieldProperties = {
+        type: 'SINGLE_LINE_TEXT',
+        code: 'test',
+        label: 'Test',
+        defaultValue: '',
+        minLength: '',
+        maxLength: '',
+      }
+      
+      const numberField: AnyFieldProperties = {
+        type: 'NUMBER',
+        code: 'test_num',
+        label: 'Test Number',
+        defaultValue: '',
+        minValue: '',
+        maxValue: '',
+        displayScale: '',
+        unit: '',
+      }
+      
+      const subtable: AnyFieldProperties = {
+        type: 'SUBTABLE',
+        code: 'test_table',
+        fields: {},
+      }
+      
+      const systemField: AnyFieldProperties = {
+        type: 'RECORD_NUMBER',
+        code: 'レコード番号',
+        label: 'レコード番号',
+      }
+      
+      // 型の検証：これらがコンパイルエラーにならなければOK
+      expect(singleLineText.type).toBe('SINGLE_LINE_TEXT')
+      expect(numberField.type).toBe('NUMBER')
+      expect(subtable.type).toBe('SUBTABLE')
+      expect(systemField.type).toBe('RECORD_NUMBER')
+    })
+
+    it('FieldType should be a union of all field type literals', () => {
+      // TypeScriptの型チェックによる検証
+      const fieldTypes: FieldType[] = [
+        'SINGLE_LINE_TEXT',
+        'MULTI_LINE_TEXT',
+        'RICH_TEXT',
+        'NUMBER',
+        'CALC',
+        'RADIO_BUTTON',
+        'CHECK_BOX',
+        'MULTI_SELECT',
+        'DROP_DOWN',
+        'DATE',
+        'TIME',
+        'DATETIME',
+        'LINK',
+        'USER_SELECT',
+        'ORGANIZATION_SELECT',
+        'GROUP_SELECT',
+        'FILE',
+        'REFERENCE_TABLE',
+        'RECORD_NUMBER',
+        'CREATOR',
+        'CREATED_TIME',
+        'MODIFIER',
+        'UPDATED_TIME',
+        'STATUS',
+        'STATUS_ASSIGNEE',
+        'CATEGORY',
+        'SUBTABLE',
+        'GROUP',
+        'RECORD_ID',
+        'REVISION',
+        '__ID__',
+        '__REVISION__',
+        'SPACER',
+        'LABEL',
+      ]
+      
+      // すべてのフィールドタイプがFieldType型に含まれることを確認
+      fieldTypes.forEach(type => {
+        expect(typeof type).toBe('string')
+      })
+      
+      expect(fieldTypes.length).toBeGreaterThan(25) // 十分な数のフィールドタイプがあることを確認
+    })
+
+    it('AnyFieldProperties should work with type guards', () => {
+      const field: AnyFieldProperties = {
+        type: 'SINGLE_LINE_TEXT',
+        code: 'test',
+        label: 'Test',
+        defaultValue: '',
+        minLength: '',
+        maxLength: '',
+      }
+      
+      // 型ガードの例
+      if (field.type === 'SINGLE_LINE_TEXT') {
+        // TypeScriptがここで型を正しく絞り込むことを期待
+        expect(field.minLength).toBeDefined()
+        expect(field.maxLength).toBeDefined()
+      }
+      
+      if (field.type === 'NUMBER') {
+        // この分岐に入らないので、TypeScriptの型チェックのみの検証
+        expect(true).toBe(true)
+      }
     })
   })
 })
