@@ -32,19 +32,25 @@ const RESERVED_FIELD_CODES = new Set([
   '更新日時',
 ]);
 
-const KintoneFieldCodeSchema = Schema.String.pipe(
+// システムフィールド用のフィールドコードスキーマ（予約語チェックなし）
+const SystemFieldCodeSchema = Schema.String.pipe(
   Schema.pattern(
     /^[$ぁ-ん\u30A0-\u30FF\u3040-\u309F\u4E00-\u9FAF\uFF66-\uFF9FＡ-Ｚａ-ｚ０-９A-Za-z0-9_＿･・＄￥€￡￦¥]+$/
   ),
   Schema.minLength(1),
-  Schema.filter((value) => !RESERVED_FIELD_CODES.has(value)),
   Schema.filter((value) => !/^[0-9]/.test(value))
 );
+
+// ユーザー定義フィールド用のフィールドコードスキーマ（予約語チェックあり）
+const UserFieldCodeSchema = SystemFieldCodeSchema.pipe(
+  Schema.filter((value) => !RESERVED_FIELD_CODES.has(value))
+);
+
 
 // 基本的なフィールド設定プロパティ
 const BaseFieldPropertiesSchema = Schema.Struct({
   type: Schema.String,
-  code: KintoneFieldCodeSchema,
+  code: UserFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
   required: Schema.optional(Schema.Boolean),
@@ -59,7 +65,7 @@ const OptionSchema = Schema.Struct({
 // エンティティ定義（ユーザー・組織・グループ選択用）
 const EntitySchema = Schema.Struct({
   type: Schema.Literal('USER', 'ORGANIZATION', 'GROUP'),
-  code: KintoneFieldCodeSchema,
+  code: UserFieldCodeSchema,
 });
 
 // ルックアップ設定
@@ -270,7 +276,7 @@ export const UserSelectFieldPropertiesSchema = Schema.extend(
             Schema.Literal('ORGANIZATION'),
             Schema.Literal('GROUP')
           ),
-          code: KintoneFieldCodeSchema,
+          code: UserFieldCodeSchema,
         })
       )
     ),
@@ -286,7 +292,7 @@ export const OrganizationSelectFieldPropertiesSchema = Schema.extend(
       Schema.Array(
         Schema.Struct({
           type: Schema.Literal('ORGANIZATION'),
-          code: KintoneFieldCodeSchema,
+          code: UserFieldCodeSchema,
         })
       )
     ),
@@ -302,7 +308,7 @@ export const GroupSelectFieldPropertiesSchema = Schema.extend(
       Schema.Array(
         Schema.Struct({
           type: Schema.Literal('GROUP'),
-          code: KintoneFieldCodeSchema,
+          code: UserFieldCodeSchema,
         })
       )
     ),
@@ -336,42 +342,42 @@ export const ReferenceTableFieldPropertiesSchema = Schema.extend(
 // システムフィールド
 export const RecordNumberFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('RECORD_NUMBER'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
 });
 
 export const CreatorFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('CREATOR'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
 });
 
 export const CreatedTimeFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('CREATED_TIME'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
 });
 
 export const ModifierFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('MODIFIER'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
 });
 
 export const UpdatedTimeFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('UPDATED_TIME'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
 });
 
 export const StatusFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('STATUS'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
   enabled: Schema.optional(Schema.Boolean),
@@ -379,7 +385,7 @@ export const StatusFieldPropertiesSchema = Schema.Struct({
 
 export const StatusAssigneeFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('STATUS_ASSIGNEE'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
   enabled: Schema.optional(Schema.Boolean),
@@ -387,7 +393,7 @@ export const StatusAssigneeFieldPropertiesSchema = Schema.Struct({
 
 export const CategoryFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('CATEGORY'),
-  code: KintoneFieldCodeSchema,
+  code: SystemFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
   enabled: Schema.optional(Schema.Boolean),
@@ -427,7 +433,7 @@ export const SubtableFieldSchema = Schema.Union(
 // レイアウトフィールド
 export const SubtableFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('SUBTABLE'),
-  code: KintoneFieldCodeSchema,
+  code: UserFieldCodeSchema,
   fields: Schema.Record({
     key: Schema.String,
     value: SubtableFieldSchema,
@@ -436,7 +442,7 @@ export const SubtableFieldPropertiesSchema = Schema.Struct({
 
 export const GroupFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('GROUP'),
-  code: KintoneFieldCodeSchema,
+  code: UserFieldCodeSchema,
   label: Schema.String,
   noLabel: Schema.optional(Schema.Boolean),
   openGroup: Schema.optional(Schema.Boolean),
@@ -444,13 +450,13 @@ export const GroupFieldPropertiesSchema = Schema.Struct({
 
 export const RecordIdFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('RECORD_ID'),
-  code: KintoneFieldCodeSchema,
+  code: UserFieldCodeSchema,
   label: Schema.String,
 });
 
 export const RevisionFieldPropertiesSchema = Schema.Struct({
   type: Schema.Literal('REVISION'),
-  code: KintoneFieldCodeSchema,
+  code: UserFieldCodeSchema,
   label: Schema.String,
 });
 
@@ -591,3 +597,6 @@ export type SpacerFieldProperties = Schema.Schema.Type<typeof SpacerFieldPropert
 export type LabelFieldProperties = Schema.Schema.Type<typeof LabelFieldPropertiesSchema>;
 export type KintoneFieldProperties = Schema.Schema.Type<typeof KintoneFieldPropertiesSchema>;
 export type GetFormFieldsResponse = Schema.Schema.Type<typeof GetFormFieldsResponseSchema>;
+
+// フィールドコードスキーマのエクスポート
+export { SystemFieldCodeSchema, UserFieldCodeSchema };

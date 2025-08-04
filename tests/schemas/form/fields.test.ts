@@ -14,6 +14,14 @@ import {
   LabelFieldPropertiesSchema,
   SystemIdFieldPropertiesSchema,
   SystemRevisionFieldPropertiesSchema,
+  StatusFieldPropertiesSchema,
+  StatusAssigneeFieldPropertiesSchema,
+  CategoryFieldPropertiesSchema,
+  RecordNumberFieldPropertiesSchema,
+  CreatorFieldPropertiesSchema,
+  CreatedTimeFieldPropertiesSchema,
+  ModifierFieldPropertiesSchema,
+  UpdatedTimeFieldPropertiesSchema,
 } from '../../../src/schemas/form/fields.js'
 
 describe('Kintone Form Field Properties Schemas', () => {
@@ -297,6 +305,65 @@ describe('Kintone Form Field Properties Schemas', () => {
       const result = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(input)
       expect(result).toEqual(input)
     })
+
+    it('should parse response with system fields', () => {
+      const input = {
+        properties: {
+          'レコード番号': {
+            type: 'RECORD_NUMBER',
+            code: 'レコード番号',
+            label: 'レコード番号',
+          },
+          'ステータス': {
+            type: 'STATUS',
+            code: 'ステータス',
+            label: 'ステータス',
+            enabled: true,
+          },
+          '作業者': {
+            type: 'STATUS_ASSIGNEE',
+            code: '作業者',
+            label: '作業者',
+            enabled: true,
+          },
+          '作成者': {
+            type: 'CREATOR',
+            code: '作成者',
+            label: '作成者',
+          },
+          '作成日時': {
+            type: 'CREATED_TIME',
+            code: '作成日時',
+            label: '作成日時',
+          },
+          '更新者': {
+            type: 'MODIFIER',
+            code: '更新者',
+            label: '更新者',
+          },
+          '更新日時': {
+            type: 'UPDATED_TIME',
+            code: '更新日時',
+            label: '更新日時',
+          },
+          'カテゴリー': {
+            type: 'CATEGORY',
+            code: 'カテゴリー',
+            label: 'カテゴリー',
+            enabled: true,
+          },
+          custom_field: {
+            type: 'SINGLE_LINE_TEXT',
+            code: 'custom_field',
+            label: 'カスタムフィールド',
+          },
+        },
+        revision: '10',
+      }
+      
+      const result = Schema.decodeUnknownSync(GetFormFieldsResponseSchema)(input)
+      expect(result).toEqual(input)
+    })
   })
 
   describe('Field code validation', () => {
@@ -360,7 +427,7 @@ describe('Kintone Form Field Properties Schemas', () => {
       })
     })
 
-    it('should reject all reserved words', () => {
+    it('should reject all reserved words for user fields', () => {
       const reservedWords = [
         'ステータス',
         '作業者',
@@ -381,6 +448,40 @@ describe('Kintone Form Field Properties Schemas', () => {
           label: 'Test',
         }
         expect(() => Schema.decodeUnknownSync(SingleLineTextFieldPropertiesSchema)(input)).toThrow()
+      })
+    })
+
+    it('should accept reserved words for system fields', () => {
+      const systemFields = [
+        { type: 'STATUS', code: 'ステータス' },
+        { type: 'STATUS_ASSIGNEE', code: '作業者' },
+        { type: 'CATEGORY', code: 'カテゴリー' },
+        { type: 'RECORD_NUMBER', code: 'レコード番号' },
+        { type: 'CREATOR', code: '作成者' },
+        { type: 'CREATED_TIME', code: '作成日時' },
+        { type: 'MODIFIER', code: '更新者' },
+        { type: 'UPDATED_TIME', code: '更新日時' },
+      ]
+
+      systemFields.forEach(({ type, code }) => {
+        const schemas = {
+          STATUS: StatusFieldPropertiesSchema,
+          STATUS_ASSIGNEE: StatusAssigneeFieldPropertiesSchema,
+          CATEGORY: CategoryFieldPropertiesSchema,
+          RECORD_NUMBER: RecordNumberFieldPropertiesSchema,
+          CREATOR: CreatorFieldPropertiesSchema,
+          CREATED_TIME: CreatedTimeFieldPropertiesSchema,
+          MODIFIER: ModifierFieldPropertiesSchema,
+          UPDATED_TIME: UpdatedTimeFieldPropertiesSchema,
+        }
+        
+        const schema = schemas[type]
+        const input = {
+          type,
+          code,
+          label: 'Test',
+        }
+        expect(() => Schema.decodeUnknownSync(schema)(input)).not.toThrow()
       })
     })
   })
