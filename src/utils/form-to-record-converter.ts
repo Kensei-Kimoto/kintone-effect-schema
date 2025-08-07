@@ -280,7 +280,9 @@ export function createRecordSchemaFromForm(
   
   return Schema.Record({
     key: Schema.String,
-    value: Schema.Union(...Object.values(recordSchemas))
+    value: Object.values(recordSchemas).length > 0 
+      ? Schema.Union(...Object.values(recordSchemas))
+      : Schema.Unknown
   });
 }
 
