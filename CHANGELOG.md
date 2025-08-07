@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0](https://github.com/Kensei-Kimoto/kintone-effect-schema/compare/v0.6.0...v0.7.0) (2025-08-07)
+
+
+### Features
+
+* add form-to-record schema converter utility ([d13fdc8](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/d13fdc8be554d4c12b47ae32cc2e35f80efe94e8))
+
+
+### Bug Fixes
+
+* handle empty schema array in Schema.Union call ([fd372b8](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/fd372b82fe08b3ca5c47266fa083c9ac2a872bca))
+* resolve ESLint errors in form-to-record converter ([eefc597](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/eefc59784aebf2f71b6b62851778b89a288451d8))
+* resolve ESLint no-unnecessary-condition errors ([aa0bec8](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/aa0bec8c78f7aa6d619b0ae8cffd0bbf3484e978))
+* resolve merge conflict with main branch ([c558aa9](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/c558aa9f524343023597fcff7541a4463cf868f6))
+* resolve rollup native module error in CI ([55d39d4](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/55d39d42763a59f296116bea6b83adf52c506483))
+* resolve type errors for subtable field conversion ([dbc06f9](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/dbc06f901c7c41f4387551e5b1c51765d5dd748e))
+* resolve TypeScript type errors using type inference ([09c2e8d](https://github.com/Kensei-Kimoto/kintone-effect-schema/commit/09c2e8d052f965f0c63d504fb7ff5735dfe8b531))
+
 ## [0.2.2] - 2025-02-03
 
 ### Added
