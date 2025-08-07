@@ -171,6 +171,58 @@ export function convertFormFieldToRecordSchema(
 }
 
 /**
+ * Convert subtable field to record schema
+ * 
+ * @param fieldProps - Field properties inside subtable
+ * @returns Record field schema
+ */
+function convertSubtableFieldToRecordSchema(
+  fieldProps: unknown
+) {
+  // サブテーブル内のフィールドのtypeに基づいて適切なスキーマを返す
+  const field = fieldProps as { type: string };
+  
+  switch (field.type) {
+    case 'SINGLE_LINE_TEXT':
+      return SingleLineTextFieldSchema;
+    case 'MULTI_LINE_TEXT':
+      return MultiLineTextFieldSchema;
+    case 'RICH_TEXT':
+      return RichTextFieldSchema;
+    case 'NUMBER':
+      return NumberFieldSchema;
+    case 'CALC':
+      return CalcFieldSchema;
+    case 'RADIO_BUTTON':
+      return RadioButtonFieldSchema;
+    case 'CHECK_BOX':
+      return CheckBoxFieldSchema;
+    case 'MULTI_SELECT':
+      return MultiSelectFieldSchema;
+    case 'DROP_DOWN':
+      return DropDownFieldSchema;
+    case 'DATE':
+      return DateFieldSchema;
+    case 'TIME':
+      return TimeFieldSchema;
+    case 'DATETIME':
+      return DateTimeFieldSchema;
+    case 'LINK':
+      return LinkFieldSchema;
+    case 'USER_SELECT':
+      return UserSelectFieldSchema;
+    case 'ORGANIZATION_SELECT':
+      return OrganizationSelectFieldSchema;
+    case 'GROUP_SELECT':
+      return GroupSelectFieldSchema;
+    case 'FILE':
+      return FileFieldSchema;
+    default:
+      return undefined;
+  }
+}
+
+/**
  * Convert subtable form field to record schema
  * 
  * @param subtableField - Subtable field properties from Form Fields API
@@ -187,7 +239,8 @@ function convertSubtableFormToRecordSchema(
   const convertedFields: Schema.Schema<unknown>[] = [];
   
   for (const [, fieldProps] of Object.entries(subtableField.fields)) {
-    const recordSchema = convertFormFieldToRecordSchema(fieldProps);
+    // サブテーブル内のフィールドを変換
+    const recordSchema = convertSubtableFieldToRecordSchema(fieldProps);
     if (recordSchema) {
       convertedFields.push(recordSchema as Schema.Schema<unknown>);
     }
