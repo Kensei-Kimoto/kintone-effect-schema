@@ -33,7 +33,10 @@ import {
   LookupFieldSchema,
   RecordIdFieldSchema,
   RevisionFieldSchema,
+  KintoneFieldSchema,
 } from '../schemas/fields.js';
+
+import { SubtableFieldSchema } from '../schemas/record.js';
 
 /**
  * Form field properties to record field schema converter
@@ -60,7 +63,7 @@ import {
  */
 export function convertFormFieldToRecordSchema(
   formField: KintoneFieldProperties | SubtableFieldProperties
-): Schema.Schema<any> | undefined {
+): typeof KintoneFieldSchema | typeof SubtableFieldSchema | undefined {
   switch (formField.type) {
     // Text fields
     case 'SINGLE_LINE_TEXT':
@@ -163,7 +166,7 @@ export function convertFormFieldToRecordSchema(
     
     // Subtable (special handling)
     case 'SUBTABLE':
-      return convertSubtableFormToRecordSchema(formField as SubtableFieldProperties);
+      return convertSubtableFormToRecordSchema(formField);
     
     // Layout fields (not included in record data)
     case 'GROUP':
@@ -182,15 +185,19 @@ export function convertFormFieldToRecordSchema(
  * @returns Subtable record schema
  */
 function convertSubtableFormToRecordSchema(
-  subtableField: SubtableFieldProperties
-): Schema.Schema<any> {
-  // Convert each field inside the subtable
-  const convertedFields: Record<string, Schema.Schema<any>> = {};
+  subtableField: KintoneFieldProperties | SubtableFieldProperties
+): typeof SubtableFieldSchema | undefined {
+  if (subtableField.type !== 'SUBTABLE') {
+    return undefined;
+  }
   
-  for (const [fieldCode, fieldProps] of Object.entries(subtableField.fields)) {
+  // Convert each field inside the subtable
+  const convertedFields: (typeof KintoneFieldSchema)[] = [];
+  
+  for (const [, fieldProps] of Object.entries(subtableField.fields)) {
     const recordSchema = convertFormFieldToRecordSchema(fieldProps);
-    if (recordSchema) {
-      convertedFields[fieldCode] = recordSchema;
+    if (recordSchema && recordSchema !== SubtableFieldSchema) {
+      convertedFields.push(recordSchema);
     }
   }
   
@@ -202,7 +209,9 @@ function convertSubtableFormToRecordSchema(
         id: Schema.String,
         value: Schema.Record({
           key: Schema.String,
-          value: Schema.Union(...Object.values(convertedFields))
+          value: convertedFields.length > 0 
+            ? Schema.Union(...convertedFields) 
+            : Schema.Unknown
         }),
       })
     ),
@@ -227,8 +236,8 @@ function convertSubtableFormToRecordSchema(
  */
 export function convertFormFieldsToRecordSchema(
   formFields: Record<string, KintoneFieldProperties | SubtableFieldProperties>
-): Record<string, Schema.Schema<any>> {
-  const recordSchemas: Record<string, Schema.Schema<any>> = {};
+): Record<string, typeof KintoneFieldSchema | typeof SubtableFieldSchema> {
+  const recordSchemas: Record<string, typeof KintoneFieldSchema | typeof SubtableFieldSchema> = {};
   
   for (const [fieldCode, fieldProps] of Object.entries(formFields)) {
     const recordSchema = convertFormFieldToRecordSchema(fieldProps);
@@ -252,9 +261,10 @@ export function convertFormFieldsToRecordSchema(
  * const recordSchema = createRecordSchemaFromForm(
  *   formResponse.properties,
  *   {
- *     price: Schema.refine(
+ *     price: (schema) => Schema.filter(
+ *       schema,
  *       (field) => field.value !== null && Number(field.value) > 0,
- *       { message: "Price must be positive" }
+ *       { message: () => "Price must be positive" }
  *     )
  *   }
  * );
@@ -262,15 +272,16 @@ export function convertFormFieldsToRecordSchema(
  */
 export function createRecordSchemaFromForm(
   formFields: Record<string, KintoneFieldProperties | SubtableFieldProperties>,
-  customValidations?: Record<string, (schema: Schema.Schema<any>) => Schema.Schema<any>>
-): Schema.Schema<any> {
+  customValidations?: Record<string, <T>(schema: Schema.Schema<T>) => Schema.Schema<T>>
+): Schema.Schema<unknown> {
   const recordSchemas = convertFormFieldsToRecordSchema(formFields);
   
   // Apply custom validations if provided
   if (customValidations) {
     for (const [fieldCode, validation] of Object.entries(customValidations)) {
       if (recordSchemas[fieldCode]) {
-        recordSchemas[fieldCode] = validation(recordSchemas[fieldCode]);
+        // Type assertion needed here as we're applying generic validation
+        recordSchemas[fieldCode] = validation(recordSchemas[fieldCode]) as typeof KintoneFieldSchema | typeof SubtableFieldSchema;
       }
     }
   }
