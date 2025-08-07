@@ -162,3 +162,11 @@ export type KintoneRecordWriteData = Record<string, { value: unknown }>
 
 // フォームフィールド設定スキーマのエクスポート
 export * from './schemas/form/index.js'
+
+// Form to Record変換ユーティリティのエクスポート
+export {
+  convertFormFieldToRecordSchema,
+  convertFormFieldsToRecordSchema,
+  createRecordSchemaFromForm,
+  getRecordFieldType,
+} from './utils/form-to-record-converter.js'
