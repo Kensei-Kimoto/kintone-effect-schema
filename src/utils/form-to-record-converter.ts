@@ -30,7 +30,6 @@ import {
   StatusFieldSchema,
   StatusAssigneeFieldSchema,
   CategoryFieldSchema,
-  LookupFieldSchema,
   RecordIdFieldSchema,
   RevisionFieldSchema,
 } from '../schemas/fields.js';
@@ -119,10 +118,6 @@ export function convertFormFieldToRecordSchema(
     // File field
     case 'FILE':
       return FileFieldSchema;
-    
-    // Lookup field (treated as LOOKUP type in record)
-    case 'LOOKUP':
-      return LookupFieldSchema;
     
     // Reference table (not included in record data directly)
     case 'REFERENCE_TABLE':
@@ -327,10 +322,6 @@ export function getRecordFieldType(formFieldType: string): string | undefined {
     case 'RECORD_ID':
     case 'REVISION':
       return formFieldType;
-    
-    // LOOKUP type exists in record schema
-    case 'LOOKUP':
-      return 'LOOKUP';
     
     // Layout fields don't exist in records
     case 'REFERENCE_TABLE':

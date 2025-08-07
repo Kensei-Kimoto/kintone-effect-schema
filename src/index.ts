@@ -104,6 +104,7 @@ export {
   decodeKintoneRecord,
 } from './decoders.js'
 
+
 // バリデーターのエクスポート
 export {
   KintoneValidationError,
@@ -170,3 +171,9 @@ export {
   createRecordSchemaFromForm,
   getRecordFieldType,
 } from './utils/form-to-record-converter.js'
+
+// フィールド設定からTypeScriptコードへの変換関数
+export { 
+  fieldConfigToTypeScriptCode,
+  fieldsConfigToTypeScriptCode 
+} from './utils/field-config-to-typescript-code.js'
