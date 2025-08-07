@@ -154,7 +154,7 @@ function valueToCode(value: unknown, indent: number = 0): string {
     return `[\n${spaces}  ${items.join(`,\n${spaces}  `)}\n${spaces}]`;
   }
   
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === 'object') {
     const entries = Object.entries(value as Record<string, unknown>)
       .filter(([, val]) => val !== undefined); // Skip undefined values
     
@@ -225,7 +225,7 @@ export function fieldConfigToTypeScriptCode(
   // Handle subtable fields specially
   if (isSubtableField(fieldConfig)) {
     const subtableConfig = fieldConfig; // Now properly typed as SubtableFieldProperties
-    const fieldsEntries = Object.entries(subtableConfig.fields || {});
+    const fieldsEntries = Object.entries(subtableConfig.fields);
     
     if (fieldsEntries.length > 0) {
       // Create a new config object with fields handled specially
@@ -288,7 +288,7 @@ export function fieldsConfigToTypeScriptCode(
       // Handle subtable fields
       if (isSubtableField(fieldConfig)) {
         const subtableConfig = fieldConfig;
-        const subtableFields = subtableConfig.fields || {};
+        const subtableFields = subtableConfig.fields;
         
         // Add type names for subtable child fields
         for (const subFieldConfig of Object.values(subtableFields)) {
