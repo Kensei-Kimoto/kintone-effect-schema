@@ -172,8 +172,17 @@ export {
   getRecordFieldType,
 } from './utils/form-to-record-converter.js'
 
-// フィールド設定からTypeScriptコードへの変換関数
-export { 
-  fieldConfigToTypeScriptCode,
-  fieldsConfigToTypeScriptCode 
-} from './utils/field-config-to-typescript-code.js'
+// (code generators removed – using value+schema module flow)
+
+// JSON(Form API) -> Effect Schema (pure) utilities
+export {
+  toFormPropertiesSchema,
+  buildFormSchemaFromJson,
+} from './utils/form-config-to-effect-schema.js'
+
+// JSON(Form API) -> Effect Schema module code (value + schema)
+export {
+  formConfigToEffectModuleCode,
+} from './utils/form-config-to-effect-module-code.js'
+
+// (CLI I/O helpers are implemented in the CLI project, not this library)

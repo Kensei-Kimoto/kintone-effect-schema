@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2025-08-08
+
+### Added
+- JSON ⇄ Effect module roundtrip utilities for Form API
+  - `formConfigToEffectModuleCode`: generate TS module (value + schema) from Form API JSON
+  - `buildFormSchemaFromJson`, `toFormPropertiesSchema`: build runtime schemas from JSON
+
+### Removed
+- Deprecated code generators not used in roundtrip flow
+  - `field-config-to-typescript-code`
+  - `field-config-to-effect-schema-code`
+
+### Notes
+- `form-to-record-converter` remains for record-value schema conversion
+
 ## [0.2.2] - 2025-02-03
 
 ### Added
