@@ -246,6 +246,8 @@ describe('Kintone Form Field Properties Schemas', () => {
       const input = {
         type: 'SUBTABLE',
         code: 'table1',
+        label: 'サブテーブル',
+        noLabel: false,
         fields: {
           text_in_table: {
             type: 'SINGLE_LINE_TEXT',
@@ -286,6 +288,8 @@ describe('Kintone Form Field Properties Schemas', () => {
       const input = {
         type: 'SUBTABLE',
         code: 'relocations',
+        label: 'サブテーブル',
+        noLabel: false,
         fields: {
           registered_by: {
             type: 'USER_SELECT',
@@ -320,6 +324,8 @@ describe('Kintone Form Field Properties Schemas', () => {
       const input = {
         type: 'SUBTABLE',
         code: 'assignments',
+        label: 'サブテーブル',
+        noLabel: false,
         fields: {
           assignee: {
             type: 'USER_SELECT',
@@ -346,6 +352,8 @@ describe('Kintone Form Field Properties Schemas', () => {
       const input = {
         type: 'SUBTABLE',
         code: 'approvals',
+        label: 'サブテーブル',
+        noLabel: false,
         fields: {
           org_select: {
             type: 'ORGANIZATION_SELECT',
@@ -376,6 +384,8 @@ describe('Kintone Form Field Properties Schemas', () => {
       const input = {
         type: 'SUBTABLE',
         code: 'attachments',
+        label: 'サブテーブル',
+        noLabel: false,
         fields: {
           file_upload: {
             type: 'FILE',
@@ -420,6 +430,8 @@ describe('Kintone Form Field Properties Schemas', () => {
           table_field: {
             type: 'SUBTABLE',
             code: 'table_field',
+            label: 'サブテーブル',
+            noLabel: false,
             fields: {
               sub_text: {
                 type: 'SINGLE_LINE_TEXT',
@@ -915,6 +927,8 @@ describe('Kintone Form Field Properties Schemas', () => {
           'relocations': {
             type: 'SUBTABLE',
             code: 'relocations',
+            label: 'サブテーブル',
+            noLabel: false,
             fields: {
               'from_location': {
                 type: 'SINGLE_LINE_TEXT',
@@ -987,6 +1001,8 @@ describe('Kintone Form Field Properties Schemas', () => {
           'relocations': {
             type: 'SUBTABLE',
             code: 'relocations',
+            label: 'サブテーブル',
+            noLabel: false,
             fields: {
               'registered_by': {
                 type: 'USER_SELECT',
@@ -1094,6 +1110,7 @@ describe('Kintone Form Field Properties Schemas', () => {
       const subtable: AnyFieldProperties = {
         type: 'SUBTABLE',
         code: 'test_table',
+        label: 'サブテーブル',
         fields: {},
       }
       
