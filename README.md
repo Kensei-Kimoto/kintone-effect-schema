@@ -2,6 +2,9 @@
 
 Type-safe schema definitions for kintone fields using Effect-TS. Normalize empty values, validate writes, and ensure runtime type safety for kintone API responses. Also supports Form Fields API for type-safe app configuration management.
 
+This project is an unofficial, third-party library for kintone.
+`kintone` is a registered trademark of Cybozu, Inc. This project is not affiliated with, sponsored, or endorsed by Cybozu, Inc.
+
 [日本語版 README はこちら](./README.ja.md)
 
 ## Features
